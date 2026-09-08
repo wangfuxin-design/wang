@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="IuLRmy7rIWrfdiSTcNSLot">
+<head data-page-node-id="doKNSemPEUOkws7q9MzLot">
+<meta charset="UTF-8" data-page-node-id="Cq69Nn9Je0imXch1WQWxiG">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="AEjbxFku6T94mTU5NsYTaf">
+<title>回澜阁 · 数字孪生 | 观澜之上</title>
+<meta name="description" content="回澜阁数字孪生——航拍实景、三维孪生、结构解构。" data-page-node-id="3mVvd7ilf1X3g5CXzHuP9R">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23091226'/%3E%3Cpath d='M6 22 L16 8 L26 22' fill='none' stroke='%23e8c98a' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M9 22 h14' stroke='%23e8c98a' stroke-width='2'/%3E%3C/svg%3E" data-page-node-id="DSypXTbE9auKHHJ53FTz4x">
+<style>
+/* ============================================================
+   回澜阁 · 数字孪生
+   ① 首页：航拍实景 + 鼠标视差 → 点击亭子平滑推入
+   ② 孪生场景：3D 模型（待接入 GLB，暂以特写图占位）+ 数据面板
+   ③ 解构分析：爆炸拆分图 · 触碰高亮 + 文字解释
+   ============================================================ */
+:root{
+  --gold:#e8c98a; --gold-dim:rgba(232,201,138,.55);
+  --cy:#4dd8ff; --txt:#e9e4d8; --dim:#8a8677;
+  --ink:#060809;
+  --panel-bg:rgba(10,13,12,.74); --panel-bd:rgba(232,201,138,.2);
+  --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+  --sans:"Bahnschrift","Segoe UI","Microsoft YaHei",sans-serif;
+  --ease:cubic-bezier(.22,.61,.21,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:var(--ink);color:var(--txt);}
+img{display:block;}
+
+/* ================= ① 首页 ================= */
+#home{position:fixed;inset:0;z-index:10;cursor:default;
+  transition:opacity .8s ease,transform 1.15s var(--ease),filter .8s ease;}
+#home.gone{opacity:0;filter:blur(4px) brightness(.6);pointer-events:none;}
+#home .bg{position:absolute;inset:0;overflow:hidden;}
+#home .bg img{width:100%;height:100%;object-fit:cover;object-position:30% 26%;
+  transform:scale(1.08);will-change:transform;}
+#home .shade{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg,rgba(4,7,10,.72) 0%,rgba(4,7,10,.25) 45%,rgba(4,7,10,0) 70%),
+             linear-gradient(0deg,rgba(4,7,10,.75) 0%,transparent 30%);}
+#home nav{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+  justify-content:space-between;padding:24px 4vw;z-index:2;}
+#home .brand{font-family:var(--serif);font-size:17px;letter-spacing:.55em;color:#f2ede1;text-decoration:none;
+  text-shadow:0 2px 12px rgba(0,0,0,.6);}
+#home nav .links{display:flex;gap:32px;}
+#home nav .links a{font-size:12px;letter-spacing:.3em;color:rgba(233,228,216,.8);text-decoration:none;
+  text-shadow:0 1px 8px rgba(0,0,0,.7);transition:color .3s;}
+#home nav .links a:hover{color:var(--gold);}
+.hero{position:absolute;left:6vw;top:50%;transform:translateY(-52%);z-index:2;max-width:480px;
+  will-change:transform;}
+.badge{display:inline-flex;align-items:center;gap:9px;width:fit-content;
+  border:1px solid rgba(232,201,138,.4);border-radius:20px;padding:7px 18px;margin-bottom:3.4vh;
+  font-size:10px;letter-spacing:.32em;color:var(--gold);background:rgba(6,10,14,.35);backdrop-filter:blur(6px);}
+.badge i{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.hero h1{font-family:var(--serif);font-weight:400;line-height:1.12;
+  text-shadow:0 4px 30px rgba(0,0,0,.65);}
+.hero h1 .l1{display:block;font-size:clamp(58px,9vw,120px);letter-spacing:.1em;color:#f5f0e4;}
+.hero h1 .l2{display:block;font-size:clamp(30px,4.6vw,60px);letter-spacing:.22em;
+  color:rgba(233,228,216,.62);margin-left:.5em;margin-top:.1em;}
+.hero p{margin-top:3.6vh;font-size:13px;line-height:2.1;color:rgba(233,228,216,.85);
+  letter-spacing:.08em;text-shadow:0 2px 10px rgba(0,0,0,.8);}
+.hero p b{color:var(--gold);font-weight:400;}
+.enter{margin-top:3.6vh;display:inline-flex;align-items:center;gap:12px;width:fit-content;
+  border:1px solid rgba(232,201,138,.55);background:rgba(6,10,14,.4);backdrop-filter:blur(6px);
+  color:var(--gold);font-family:var(--sans);font-size:12px;letter-spacing:.3em;padding:13px 30px;
+  cursor:pointer;transition:.35s var(--ease);}
+.enter:hover{background:rgba(232,201,138,.16);letter-spacing:.38em;}
+.enter .arr{transition:transform .35s;}
+.enter:hover .arr{transform:translateX(6px);}
+.foot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;
+  padding:0 6vw 3.4vh;font-size:11px;letter-spacing:.2em;color:rgba(233,228,216,.6);z-index:2;
+  text-shadow:0 1px 8px rgba(0,0,0,.8);}
+.foot .ln{width:44px;height:1px;background:rgba(232,201,138,.4);}
+/* 亭子热区 */
+#pavSpot{position:absolute;left:25%;top:14%;width:20%;height:30%;z-index:3;cursor:pointer;
+  border:none;background:transparent;}
+#pavSpot .ring{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;
+  border-radius:50%;border:1px solid rgba(232,201,138,.85);animation:pulse 2.6s ease-out infinite;}
+@keyframes pulse{0%{transform:scale(.45);opacity:.95;}100%{transform:scale(1.5);opacity:0;}}
+#pavSpot .tip{position:absolute;left:50%;top:-34px;transform:translateX(-50%);white-space:nowrap;
+  font-size:11px;letter-spacing:.3em;color:#f5f0e4;text-shadow:0 1px 10px rgba(0,0,0,.9);
+  animation:breathe 3s ease-in-out infinite;}
+@keyframes breathe{50%{opacity:.45;}}
+#heroGL{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.6s ease;}
+#heroGL.on{opacity:1;}
+#glLoad{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;
+  color:rgba(233,228,216,.78);font-size:12px;letter-spacing:.42em;display:flex;align-items:center;gap:14px;
+  transition:opacity .8s ease;}
+#glLoad.off{opacity:0;pointer-events:none;}
+#glLoad.warn{color:#e8b86a;font-size:13px;letter-spacing:.15em;}
+#glLoad .spin{width:20px;height:20px;border:1px solid rgba(233,228,216,.22);border-top-color:var(--gold);
+  border-radius:50%;animation:sp 1s linear infinite;flex:none;}
+#glLoad .bar{width:220px;height:2px;background:rgba(233,228,216,.14);border-radius:2px;overflow:hidden;flex:none;}
+#glLoad .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#f5e3b0);
+  transition:width .35s ease;box-shadow:0 0 8px rgba(212,175,105,.7);}
+#glLoad .pct{min-width:4em;text-align:left;font-size:11px;letter-spacing:.1em;}
+#twinLoad{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  color:rgba(233,228,216,.85);font-size:11px;letter-spacing:.35em;transition:opacity .6s ease;}
+#twinLoad.off{opacity:0;pointer-events:none;}
+#twinLoad .bar{width:260px;height:3px;background:rgba(233,228,216,.12);border-radius:3px;overflow:hidden;}
+#twinLoad .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#f5e3b0);
+  transition:width .35s ease;box-shadow:0 0 10px rgba(212,175,105,.8);}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:820px){#home nav .links{display:none;}.hero{left:5vw;max-width:82vw;}}
+
+/* ================= 通用场景层 ================= */
+#twin,#explode{position:fixed;inset:0;z-index:5;visibility:hidden;opacity:0;
+  transition:opacity .7s ease .5s,visibility 0s 1.3s;}
+#twin.on,#explode.on{visibility:visible;opacity:1;transition:opacity .7s ease .55s;}
+.scanline{position:fixed;left:0;right:0;height:120px;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(232,201,138,.03),transparent);
+  animation:sweep 10s linear infinite;}
+@keyframes sweep{from{top:-140px;}to{top:110%;}}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 52%,rgba(2,4,5,.6) 100%);}
+#bg{position:fixed;inset:0;z-index:0;}
+#bg canvas{display:block;}
+
+/* 顶栏 */
+header{position:absolute;top:0;left:0;right:0;height:60px;z-index:6;
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  background:linear-gradient(180deg,rgba(6,8,9,.85),transparent);pointer-events:none;}
+header>*{pointer-events:auto;}
+.t-btn{border:1px solid rgba(232,201,138,.3);background:rgba(6,8,9,.5);color:var(--dim);
+  font-size:11px;letter-spacing:.2em;padding:7px 14px;cursor:pointer;transition:.3s;font-family:var(--sans);}
+.t-btn:hover{color:var(--gold);border-color:var(--gold);}
+.t-title{text-align:center;}
+.t-title h2{font-family:var(--serif);font-size:19px;letter-spacing:.5em;color:var(--txt);font-weight:400;}
+.t-title span{display:block;font-size:9px;letter-spacing:.4em;color:var(--dim);margin-top:2px;}
+.t-clock{text-align:right;font-variant-numeric:tabular-nums;}
+.t-clock .tm{font-size:17px;color:var(--txt);letter-spacing:2px;}
+.t-clock .dt{font-size:10px;color:var(--dim);letter-spacing:1px;}
+
+/* 数据面板 */
+.panel{position:absolute;top:74px;width:256px;z-index:5;display:flex;flex-direction:column;gap:10px;
+  transition:opacity .5s ease,transform .5s var(--ease);}
+.panel.left{left:14px;--slide:-30px;}
+.panel.right{right:14px;--slide:30px;}
+#twin.zoomed .panel{opacity:0;transform:translateX(var(--slide));pointer-events:none;}
+.card{position:relative;background:var(--panel-bg);border:1px solid var(--panel-bd);
+  border-radius:3px;padding:10px 13px 11px;backdrop-filter:blur(10px);}
+.card h3{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:2px;
+  padding-bottom:7px;margin-bottom:8px;border-bottom:1px solid rgba(232,201,138,.14);}
+.card h3::before{content:"";width:3px;height:11px;background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.card h3 .en{font-size:8.5px;font-weight:400;letter-spacing:1px;color:var(--dim);margin-left:auto;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.stat{background:rgba(232,201,138,.05);border:1px solid rgba(232,201,138,.1);border-radius:2px;padding:7px 9px;}
+.stat .num{font-size:19px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums;}
+.stat .num .u{font-size:9px;color:var(--dim);font-weight:400;margin-left:2px;}
+.stat .lb{font-size:9.5px;color:var(--dim);letter-spacing:1px;margin-top:1px;}
+.stat.cy .num{color:var(--cy);}
+.chart-wrap canvas{display:block;width:100%;margin-top:6px;}
+.chart-cap{display:flex;justify-content:space-between;font-size:8.5px;color:rgba(138,134,119,.6);margin-top:2px;letter-spacing:1px;}
+.dev{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:11px;letter-spacing:1px;
+  border-bottom:1px dashed rgba(232,201,138,.08);}
+.dev:last-child{border-bottom:none;}
+.dev .d-dot{width:6px;height:6px;border-radius:50%;background:#37e08a;box-shadow:0 0 6px #37e08a;flex-shrink:0;}
+.dev .d-dot.warn{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.dev .d-val{margin-left:auto;color:var(--dim);}
+@media(max-width:1100px){.panel{width:222px;}}
+@media(max-width:820px){.panel{top:auto;bottom:64px;max-height:34vh;}}
+
+/* 孪生舞台 */
+#stage{position:absolute;inset:70px 270px 70px;z-index:2;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;}
+#stage .holo{position:relative;height:100%;aspect-ratio:1432/1780;max-width:100%;
+  display:flex;align-items:center;justify-content:center;
+  animation:floaty 8s ease-in-out infinite;transition:transform 1s var(--ease);}
+@keyframes floaty{50%{transform:translateY(-9px);}}
+#stage .holo img{max-width:100%;max-height:92%;object-fit:contain;
+  filter:drop-shadow(0 24px 50px rgba(0,0,0,.7));}
+#stage .holo::before{content:"";position:absolute;left:12%;right:12%;bottom:-4%;height:26px;
+  border-radius:50%;background:radial-gradient(ellipse,rgba(77,216,255,.22),transparent 70%);}
+#stage .modelbox{width:100%;height:100%;display:block;}
+#stage .holo.is3d .modelbox{display:block;}
+#stage .holo.is3d img{display:none;}
+#stage .holo.is3d{animation:none;aspect-ratio:auto;width:100%;}
+#twinGL{width:100%;height:100%;display:block;}
+#stage .m-badge{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);
+  font-size:9.5px;letter-spacing:.25em;color:rgba(138,134,119,.8);border:1px dashed rgba(138,134,119,.4);
+  padding:4px 12px;border-radius:2px;white-space:nowrap;}
+
+/* 底部 HUD */
+#hud{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;
+  display:flex;align-items:center;gap:14px;padding:9px 18px;
+  background:rgba(8,10,10,.8);border:1px solid var(--panel-bd);border-radius:3px;
+  backdrop-filter:blur(12px);max-width:92vw;}
+#hud .hint{font-size:11px;letter-spacing:.22em;color:var(--dim);white-space:nowrap;}
+#hud .hint b{color:var(--gold);font-weight:400;}
+
+/* ================= ③ 解构分析 ================= */
+#explode{background:rgba(4,6,8,.55);backdrop-filter:blur(6px);}
+#explode .sheet-wrap{position:absolute;inset:64px 330px 20px 20px;display:flex;
+  align-items:center;justify-content:center;}
+#explode .sheet3d{position:relative;height:100%;aspect-ratio:1/1;max-width:100%;
+  border-radius:6px;overflow:hidden;background:radial-gradient(120% 120% at 50% 30%,#10161f 0%,#07090d 70%);
+  box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 0 1px rgba(232,201,138,.25);
+  animation:sheetIn .9s var(--ease);}
+@keyframes sheetIn{from{opacity:0;transform:translateY(26px) scale(.97);}to{opacity:1;transform:none;}}
+#explode .sheet3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;}
+#explode .exp-badge{position:absolute;left:14px;bottom:12px;z-index:5;font-size:11px;
+  letter-spacing:.12em;color:rgba(233,228,216,.6);padding:6px 12px;border-radius:3px;
+  background:rgba(10,14,20,.55);border:1px solid rgba(232,201,138,.18);pointer-events:none;
+  transition:opacity .4s;}
+#explode .exp-badge.off{opacity:0;}
+#explode #expLoad{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;
+  align-items:center;justify-content:center;z-index:6;background:rgba(5,7,10,.35);
+  font-size:12px;letter-spacing:.15em;color:rgba(233,228,216,.85);transition:opacity .5s;}
+#explode #expLoad .spin{width:22px;height:22px;border:1px solid rgba(233,228,216,.22);
+  border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;}
+#explode #expLoad .bar{width:180px;height:3px;border-radius:3px;background:rgba(233,228,216,.12);overflow:hidden;}
+#explode #expLoad .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e8c98a,#f0b45a);
+  box-shadow:0 0 12px rgba(240,180,90,.6);transition:width .2s;}
+#explode #expLoad .pct{font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums;}
+#explode #expLoad.off{opacity:0;pointer-events:none;}
+/* 右侧信息栏 */
+#explode .side{position:absolute;top:74px;right:14px;bottom:20px;width:300px;z-index:6;
+  display:flex;flex-direction:column;gap:10px;}
+#explode .info{padding:14px 16px;min-height:150px;}
+#explode .info .no{font-size:26px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums;
+  line-height:1;letter-spacing:1px;}
+#explode .info h4{font-family:var(--serif);font-size:17px;letter-spacing:.2em;color:var(--txt);
+  margin:8px 0 2px;font-weight:400;}
+#explode .info .en{font-size:9px;letter-spacing:.2em;color:var(--dim);}
+#explode .info p{margin-top:10px;font-size:11.5px;line-height:1.9;color:rgba(233,228,216,.82);letter-spacing:.05em;}
+#explode .layers{flex:1;overflow-y:auto;scrollbar-width:none;padding:6px;}
+#explode .layers::-webkit-scrollbar{display:none;}
+#explode .ly{display:flex;align-items:center;gap:10px;padding:7px 10px;cursor:pointer;border-radius:3px;
+  border:1px solid transparent;transition:.25s;}
+#explode .ly:hover,#explode .ly.pin{background:rgba(232,201,138,.08);border-color:rgba(232,201,138,.25);}
+#explode .ly .n{font-size:10px;color:var(--gold);width:20px;font-variant-numeric:tabular-nums;}
+#explode .ly .nm{font-size:12px;letter-spacing:.15em;color:rgba(233,228,216,.85);}
+#explode .ly.pin .nm{color:var(--gold);}
+@media(max-width:1100px){
+  #explode .sheet-wrap{inset:60px 12px 84px 12px;}
+  #explode .side{top:auto;right:12px;left:12px;bottom:12px;width:auto;flex-direction:row;max-height:150px;}
+  #explode .info{flex:1.2;min-height:0;}
+  #explode .layers{flex:1;}
+}
+</style>
+</head>
+<body data-page-node-id="nBZQp8hLjioCZpNaKG7xM6">
+
+<div id="bg" data-page-node-id="D8KACt9AUEk5gCeMFtFhXY"><canvas id="bgcv" data-page-node-id="Fqx8nbdjoaWmidGwTvEcxK"></canvas></div>
+<div class="vignette" data-page-node-id="21F8QnDX0p2KtfcFvFLGi3"></div>
+<div class="scanline" data-page-node-id="F4THtyZM8HrpYJ8znrwEvR"></div>
+
+<!-- ================= ① 首页 ================= -->
+<div id="home" data-page-node-id="WMGsfZIwISkacAVZ1ObkMj">
+  <div class="bg" data-page-node-id="BN6FhzH24Q0zZ9NoNAB9vA"><canvas id="heroGL" data-page-node-id="baNJRh6VTZfM3MlNSBhlqm"></canvas></div>
+  <div id="glLoad" data-page-node-id="LrxQsgEFKlfq9y8LBMbnTc"><span class="spin" data-page-node-id="IlSnXpsDS6cDWUhE3fNia3"></span><span class="txt" data-page-node-id="wNQAHmSanZVyqhWOvBUA2r">正在构建数字孪生场景</span><span class="bar" data-page-node-id="e2RrCBhS9Ci5QuVUhiLLeE"><i data-page-node-id="qir2yEEsdC8SceAr1QaSbW"></i></span><span class="pct" data-page-node-id="qDDkqOudJKqSyupuAu86NX">0%</span></div>
+  <div class="shade" data-page-node-id="m5SHEiL7oa4OwqMDmTaWXe"></div>
+  <nav data-page-node-id="CNXApK9iWqz75LlHHqJvwT">
+    <a class="brand" href="#" onclick="return false" data-page-node-id="tUqslc0wENVMAbOBJQtrTp">回澜阁</a>
+    <div class="links" data-page-node-id="pXnowsQZo4YQlei9kCURck"><a href="#" onclick="return false" data-page-node-id="pOwbv8NJkJZm9q9kURTyA3">作品</a><a href="#" onclick="return false" data-page-node-id="LSBBlPbGqAe1MRPFMCseQP">关于</a><a href="#" onclick="return false" data-page-node-id="VHSaDEzDdkWqZnGOYO4FYK">联系</a></div>
+  </nav>
+  <div class="hero" id="heroText" data-page-node-id="8Hwzt46yz6GHP6Ja6z3pdt">
+    <div class="badge" data-page-node-id="WbakLFSPnP6b88Svm3qj0F"><i data-page-node-id="r1QxONOjPUA3HA4jHuFu2C"></i>ZHANQIAO PIER · DIGITAL TWIN</div>
+    <h1 data-page-node-id="pOJdR8ZgNJSlbzkMclW5MR"><span class="l1" data-page-node-id="sG1slxoMO5wiiIBKJD0QcQ">回澜阁</span><span class="l2" data-page-node-id="xLIWfH8zWUlHRJSh7M2P1t">观澜之上 · 海天之间</span></h1>
+    <p data-page-node-id="lDJ3D8RtJmGNFewBVjcwAW">栈桥尽头的<b data-page-node-id="Sj7nMUle0PcvUURtziAA5A">百年八角重檐</b>，以数字孪生再观澜——<br data-page-node-id="Ht6EVn7vn0WHuOEJ8tZTEs">点击建筑，步步入阁；单击结构，看九层木构如何如浪展开。</p>
+    <button class="enter" id="enterBtn" data-page-node-id="CmoNkVmAux3OEtl9qax8uB">步入阁中<span class="arr" data-page-node-id="kw7icsC9DVviLvz2NxFcIK">⟶</span></button>
+  </div>
+  <div class="foot" data-page-node-id="vOAvrZLJdB2d1ZynvfBpVE"><span class="ln" data-page-node-id="Tv0MZ0VYavU6MDIJtJ6EIX"></span><span data-page-node-id="lD8PvxB6IMWC5hpQQ4Imeo">青岛 · 栈桥回澜阁</span><span style="margin-left:auto" data-page-node-id="AKKZOyObgnDopLA7k51E6d">REAL-TIME 3D DIGITAL TWIN</span></div>
+  <button id="pavSpot" title="步入阁中" data-page-node-id="m6NzRtyGH7UdyHYfwetoCL"><span class="ring" data-page-node-id="yxaEJ4qKJqRT0EPeNkTUUw"></span><span class="tip" data-page-node-id="QEMJyqqaKneJDHceSSrIhm">点击建筑 · 步入阁中</span></button>
+</div>
+
+<!-- ================= ② 孪生场景 ================= -->
+<div id="twin" data-page-node-id="4zwS2rtWBl4Ja2qJMiZ8A9">
+  <header data-page-node-id="US8UlPq92NU33HLWI9NUSx">
+    <button class="t-btn" id="homeBtn" data-page-node-id="s1ufsNGEPuobS8vOhfpSGH">◂ 首页</button>
+    <div class="t-title" data-page-node-id="NN8nGNoZT4AoJ3Mi1YjCk8"><h2 data-page-node-id="BCgt3XHXhUKFqlhDEBjLrV">回澜阁 · 数字孪生</h2><span data-page-node-id="ENMZl5Sh53xZCLWGcTixiv">HUILAN PAVILION DIGITAL TWIN</span></div>
+    <div class="t-clock" data-page-node-id="ev8Crrml45CdpSwMtCGCeu"><div class="tm" id="clockT" data-page-node-id="t7SF2nj137vvauqTwGffdr">--:--:--</div><div class="dt" id="clockD" data-page-node-id="HPuOyEUoPC4uWCiGQ1fH9b">----</div></div>
+  </header>
+
+  <aside class="panel left" data-page-node-id="u9zvYXKDFIPwQy3g41EkOB">
+    <div class="card" data-page-node-id="Mlo9nwmp9t9lbeY5O1lLeF">
+      <h3 data-page-node-id="OqLGADiGjyqed9nkhtzlWe">潮汐监测<span class="en" data-page-node-id="9Jf8BTZM35J58ITeXAu4gG">TIDE</span></h3>
+      <div class="stat-grid" data-page-node-id="CZUezdAlGumiVWzAbXYgVg">
+        <div class="stat cy" data-page-node-id="tYbNH7yuqeRptKnTrb15GI"><div class="num" id="tideNum" data-page-node-id="Rz1qGE54bPdOG2JBxnpqA3">3.21<u class="u" data-page-node-id="ApEuVRWUheJPMLaiHYgDio">m</u></div><div class="lb" data-page-node-id="TIbxTfHI2KyptMTtdLV3T7">实时潮位</div></div>
+        <div class="stat cy" data-page-node-id="et1B6TGiziUCFZ5HU5MLvx"><div class="num" id="waveNum" data-page-node-id="pNs43MHCnzb1QD8VZnZB5I">0.84<u class="u" data-page-node-id="EpISGD2z6TYAuVnmOFRZYf">m</u></div><div class="lb" data-page-node-id="NQkNInmNMwP8MGHY7b7yb8">有效浪高</div></div>
+      </div>
+      <div class="chart-wrap" data-page-node-id="vIRj0GZfRGIqfvmFmLewAb"><canvas id="tideChart" width="228" height="68" data-page-node-id="ec2NJEKLnMDAHbMaEKSOhf"></canvas>
+        <div class="chart-cap" data-page-node-id="6IfPgPY9Pnx4BDrAT7Na1j"><span data-page-node-id="7vIGnIKuQQHCdLYDlDABoN">-6h</span><span data-page-node-id="c4AJn3AzDlBPptoQB4LNRh">潮位过程线</span><span data-page-node-id="G2VR9QgOYn1SDspmhp2OTA">now</span></div></div>
+    </div>
+    <div class="card" data-page-node-id="QuX9NlWRzqLfR5YeJ0NIMw">
+      <h3 data-page-node-id="mnUYod35Yu7p20kH3m9Bts">环境感知<span class="en" data-page-node-id="ijC8d5dBL1dPYb6XIwtIUP">ENV</span></h3>
+      <div class="stat-grid" data-page-node-id="9tIQARllNoMHry0YH5kENN">
+        <div class="stat" data-page-node-id="FbxELW3d5OIsBQlWMCKCgD"><div class="num" id="windNum" data-page-node-id="WMCkrUMYiVvr5ERnbcvUsV">4.6<u class="u" data-page-node-id="TlDhis9T7dstBIWx3kibco">m/s</u></div><div class="lb" data-page-node-id="EGXtv5miwBuCXA8Av44YI2">风速</div></div>
+        <div class="stat" data-page-node-id="oLfM3u8hhejSmwBO7DuiS9"><div class="num" id="tempNum" data-page-node-id="LaEZMOEFOo2AVSUvASoKLG">24.3<u class="u" data-page-node-id="XeGgvfWcDs4kga1DOv5zdU">℃</u></div><div class="lb" data-page-node-id="yx1P0TM1P5mEgU61UcxVnJ">气温</div></div>
+        <div class="stat" data-page-node-id="nHvl9Ic9ljAtOg76020v1b"><div class="num" id="humNum" data-page-node-id="gAsSHuUf7bLqrTxRCBDBdJ">68<u class="u" data-page-node-id="inGLfru75cq7AzucvTRI63">%</u></div><div class="lb" data-page-node-id="Ra1Sr8TBQyu4sm0mgELnp8">湿度</div></div>
+        <div class="stat" data-page-node-id="xRbla8TniigdQE3b4ut83I"><div class="num" id="visNum" data-page-node-id="nwWGgaMEkwHbZCSdDdYyLT">9.2<u class="u" data-page-node-id="tv5veNNZLhqaG84vgloISY">km</u></div><div class="lb" data-page-node-id="SXHtUBYqPAAovpOJB8Dbnr">能见度</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="panel right" data-page-node-id="Zc3bN4vqTZLltwsG1gusIE">
+    <div class="card" data-page-node-id="GXUWlBY4QA7t9JOq5d5SPp">
+      <h3 data-page-node-id="c1wgjGgEMWc3EfJe5F8A2x">客流监测<span class="en" data-page-node-id="bhEogRLSn8zTI8DqPi1Yoo">VISITORS</span></h3>
+      <div class="stat-grid" data-page-node-id="0sEr9MqD3CpJE3VZZ7pJlY">
+        <div class="stat" data-page-node-id="lWyz3tZTtRHKIGjmQSmxsJ"><div class="num" id="inNum" data-page-node-id="TRPJFvw4rwPAAA72LZfdJ0">216<u class="u" data-page-node-id="YbgAueaoHWd9EhGjH64ffU">人</u></div><div class="lb" data-page-node-id="zma8wgCjDgKDNX4ldD6q6N">阁内实时</div></div>
+        <div class="stat" data-page-node-id="lsZiplpJ87wIOD57wxOXZs"><div class="num" id="dayNum" data-page-node-id="YpZAhhe2r6z4EGNCfjC8xo">1847<u class="u" data-page-node-id="evbZePCW9Ch7HG6CBLxy27">人</u></div><div class="lb" data-page-node-id="g1HHfe8oTI1HckjxWaDvE6">今日累计</div></div>
+      </div>
+      <div class="chart-wrap" data-page-node-id="yx9aAJwqRIx4sIWHgjTJO4"><canvas id="flowChart" width="228" height="56" data-page-node-id="QWYsCr5nn8FmNY8IacBFeN"></canvas>
+        <div class="chart-cap" data-page-node-id="H1axRxwZobTbjxBdvlr7Uw"><span data-page-node-id="Wle9aLivnQkrSLznDOu57w">08:00</span><span data-page-node-id="dGSsXuUJ90OXySRxqn2vVX">分时客流</span><span data-page-node-id="5GOGtpXnnIf9qLFI0Tebk1">20:00</span></div></div>
+    </div>
+    <div class="card" data-page-node-id="jtkzmdqQUn5WPyS9NvXMfm">
+      <h3 data-page-node-id="g9h9QuGeaqNEAT2CzOYqVf">结构健康<span class="en" data-page-node-id="YYoCvusNUQJaZPBzDX2fpY">STRUCTURE</span></h3>
+      <div class="stat-grid" data-page-node-id="yoHJDMFIML01zEbrp2rG2V">
+        <div class="stat" data-page-node-id="h2fWOftH7D3xUGxCeTUQAG"><div class="num" id="tiltNum" data-page-node-id="Ywd8fAVoATqsHAtY50cW5x">0.02<u class="u" data-page-node-id="J8xGkEOQBbLAzF66ingB29">°</u></div><div class="lb" data-page-node-id="t1gteseDTjVxdSywusK1Hf">阁体倾斜</div></div>
+        <div class="stat" data-page-node-id="pfcImDlkCH9UnSOmQI0dUK"><div class="num" id="corrNum" data-page-node-id="do4kzsw8ruOcZWKqQtG2vV">0.11<u class="u" data-page-node-id="mnzBh99HA5PYOBgnoP5oRm">mm/a</u></div><div class="lb" data-page-node-id="rBEyelmHyuNNTpZ6eaQsVx">构件腐蚀率</div></div>
+      </div>
+    </div>
+    <div class="card" data-page-node-id="mcPp67xXo9MHeJHIr4zJrn">
+      <h3 data-page-node-id="KnJ4JunJjq8qXRU3t4UuxN">预警信息<span class="en" data-page-node-id="npby8Hv5l2UbPkAnbMIvXt">ALERTS</span></h3>
+      <div class="dev" data-page-node-id="Vww7WcTIM5gtwxOEHhImTr"><span class="d-dot warn" data-page-node-id="lRyVA7lCBKrQwhUQRkpyPq"></span><span data-page-node-id="DxoaBawsi1OZLrBGmaXQF3">傍晚高潮位 · 注意临边</span></div>
+      <div class="dev" data-page-node-id="YihsBSVwsaRHZnS8nsLoOR"><span class="d-dot" data-page-node-id="oxxTxB2MPSOa1F5UJe2f2G"></span><span data-page-node-id="qG6VPt60UyJqDFvSnNyuqN">无大风·无风暴潮预警</span></div>
+    </div>
+  </aside>
+
+  <div id="stage" title="" data-page-node-id="pEP1lW25rrgAFgb6TG8V33">
+    <div class="holo" id="holo" data-page-node-id="3r7ZNmXHmuJEHKqY1b9sNZ">
+      <div class="modelbox is-on" data-page-node-id="uwhauDqHh1lcF1K8HVt8nW"><canvas id="twinGL" data-page-node-id="fScGCJ0RstDFHH8zGuWwJy"></canvas></div>
+      <div class="m-badge" id="mBadge" data-page-node-id="f6x12Is9zNN6AveMoZ3LY0">拖拽旋转 · 滚轮缩放 · 单击建筑展开解构</div>
+      <div id="twinLoad" data-page-node-id="Pf7AJdPGUCeEWCxSv5zAC8"><span data-page-node-id="HBW2QvHuwbBOFBURbsDA7t">正在加载建筑模型</span><span class="bar" data-page-node-id="Gc0WbDFuf9Jpi14caVHDoe"><i data-page-node-id="MvJCH7YtcTwOjHMqkL8kOT"></i></span><span class="pct2" data-page-node-id="KHCVhtilFFADLhK8LHNcRK">0%</span></div>
+    </div>
+  </div>
+
+  <div id="hud" data-page-node-id="ZAVu4RDYuTEc4fJjapFAqk">
+    <span class="hint" data-page-node-id="I1cfHD4PAyvkWehqWVbkJA">单击 <b data-page-node-id="bMSalYwnt0bvdmWlPDatKY">建筑</b> · 展开九层结构爆炸</span>
+  </div>
+</div>
+
+<!-- ================= ③ 解构分析 ================= -->
+<div id="explode" data-page-node-id="9LEAvyAFWkGEomWKjSur25">
+  <header data-page-node-id="kSiEQHGc2myWdYpYJOM3Bg">
+    <button class="t-btn" id="backTwinBtn" data-page-node-id="mtVfSZAyxfuqCTzOavTFUw">◂ 返回全景</button>
+    <div class="t-title" data-page-node-id="vaN8PGIiDoWMv4b5wcnwBG"><h2 data-page-node-id="aamEW81bPvbRtBAOaeJyt3">三维结构爆炸解构</h2><span data-page-node-id="jKBaHkE07G8b2kLidvOkGp">结构与构造解析 · STRUCTURE ANALYSIS</span></div>
+    <div class="t-btn" style="visibility:hidden" data-page-node-id="OM2zaMBIEVz59KBSIiT0Qi">·</div>
+  </header>
+
+  <div class="sheet-wrap" data-page-node-id="PGjBH9BXcFObvFekkrgDxH">
+    <div class="sheet3d" id="sheet3d" data-page-node-id="vBcFrgzcjWOtlYcWll4UiC">
+      <canvas id="expGL" data-page-node-id="XwFUFUSmWz8ekFsasqyRDU"></canvas>
+      <div class="exp-badge" id="expBadge">拖拽旋转 · 单击建筑爆炸解构</div>
+      <div id="expLoad"><span class="spin"></span><span class="txt">正在加载爆炸模型</span><span class="bar"><i></i></span><span class="pct">0%</span></div>
+    </div>
+  </div>
+
+  <aside class="side" data-page-node-id="rzuc5AvGiOXFl1ELsmJwfn">
+    <div class="card info" id="infoCard" data-page-node-id="yDFzZZEJp8oF7fFHVU8P9F">
+      <div class="no" id="iNo" data-page-node-id="ujbgCuqt53zEio53iAGSVG">九层</div>
+      <h4 id="iName" data-page-node-id="1jZfZkFkZ4GANtwUoLrddG">回澜阁 · 结构解构</h4>
+      <div class="en" id="iEn" data-page-node-id="fp25nGvIq6UmQGIdJLuHID">EXPLODED VIEW</div>
+      <p id="iDesc" data-page-node-id="f4jKrH9DOtYF9xRezv3QaV">单击建筑可展开九层结构爆炸；拖拽旋转查看，鼠标悬停各层高亮并显示构造说明。</p>
+    </div>
+    <div class="card layers" id="layerList" data-page-node-id="gA66fdQojGlEjYZDbRNYRd"></div>
+  </aside>
+</div>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/vendor/GLTFLoader.js"></script>
+<script src="assets/vendor/DRACOLoader.js"></script>
+<script src="assets/vendor/OrbitControls.js"></script>
+<script>
+"use strict";
+/* ================= 全局状态 ================= */
+
+/* Draco 解码器（三个场景共用，压缩模型通用） */
+const dracoLoader = new THREE.DRACOLoader();
+dracoLoader.setDecoderPath("assets/vendor/");
+const MODEL_SRC = "assets/2回澜阁建筑模型.glb"; /* 孪生场景建筑模型 */
+
+/* 直接双击 HTML（file://）时浏览器会拦截模型请求，给出明确提示 */
+if (location.protocol === "file:") {
+  const el = document.getElementById("glLoad");
+  const txt = el.querySelector(".txt");
+  if (txt) txt.textContent = "模型需通过预览面板访问 · 直接双击打开会被浏览器拦截";
+  const sp = el.querySelector(".spin"); if (sp) sp.remove();
+  const bar = el.querySelector(".bar"); if (bar) bar.remove();
+  const pct = el.querySelector(".pct"); if (pct) pct.remove();
+  el.classList.add("warn");
+}
+const home = document.getElementById("home");
+const twin = document.getElementById("twin");
+const explode = document.getElementById("explode");
+let cur = "home";
+
+function show(name) {
+  cur = name;
+  home.classList.toggle("gone", name !== "home");
+  home.style.pointerEvents = name === "home" ? "" : "none";
+  twin.classList.toggle("on", name === "twin");
+  explode.classList.toggle("on", name === "explode");
+}
+
+/* ================= 全局错误诊断：把错误显示到加载条上 ================= */
+window.addEventListener("error", e => {
+  const el = document.getElementById("glLoad");
+  if (el && !el.classList.contains("off")) {
+    const txt = el.querySelector(".txt");
+    if (txt) txt.textContent = "页面错误: " + (e.message || e.type).slice(0, 60);
+    el.style.color = "#e88";
+  }
+});
+
+/* ================= 首页 · 真 3D 鸟瞰场景 ================= */
+const heroText = document.getElementById("heroText");
+let mx = 0, my = 0, cx = 0, cy = 0;
+window.addEventListener("mousemove", e => {
+  mx = e.clientX / innerWidth - .5;
+  my = e.clientY / innerHeight - .5;
+});
+
+const HeroGL = (function () {
+  const canvas = document.getElementById("heroGL");
+  const loaderEl = document.getElementById("glLoad");
+
+  /* WebGL 能力自检：不支持时给出明确提示 + 降级为静态图 */
+  let glErr = "";
+  try {
+    const t = document.createElement("canvas");
+    const gl = t.getContext("webgl2") || t.getContext("webgl");
+    if (!gl) glErr = "当前浏览器不支持 WebGL，无法渲染 3D";
+  } catch (err) { glErr = "WebGL 初始化失败: " + (err.message || ""); }
+  if (glErr) {
+    const txt = loaderEl.querySelector(".txt");
+    if (txt) txt.textContent = glErr + " · 已降级为图片模式";
+    loaderEl.classList.add("warn");
+    const bar = loaderEl.querySelector(".bar"); if (bar) bar.remove();
+    const pct = loaderEl.querySelector(".pct"); if (pct) pct.remove();
+    const sp = loaderEl.querySelector(".spin"); if (sp) sp.remove();
+    canvas.outerHTML = '<div class="bg"><img id="heroImg" src="assets/素材1-回澜阁航拍.jpg" alt="回澜阁" style="width:100%;height:100%;object-fit:cover;opacity:.85"></div>';
+    return { dollyTo(done) { done(); }, reset() {}, get ready() { return false; } };
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x060d18);
+  scene.fog = new THREE.FogExp2(0x0a1524, .38);
+
+  const cam = new THREE.PerspectiveCamera(40, 1, .01, 60);
+  /* 首页：建筑偏右（上移后），左/下留海面 */
+  const HOME_POS = new THREE.Vector3(.95, .46, 1.18);
+  const HOME_TGT = new THREE.Vector3(-.68, .34, -.20);
+  /* 点击后：拉近 + 换角度（绕到近斜侧，略仰视屋檐） */
+  const PAVI_POS = new THREE.Vector3(.34, .42, .42);
+  const PAVI_TGT = new THREE.Vector3(-.52, .44, -.26);
+  cam.position.copy(HOME_POS);
+
+  /* 光照：黄昏暖主光 + 冷环境光 */
+  scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x18202e, .55));
+  const sun = new THREE.DirectionalLight(0xffd9a6, 1.5);
+  sun.position.set(.8, 1.1, .5);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x5f7fae, .5);
+  fill.position.set(-.7, .4, -.4);
+  scene.add(fill);
+
+  /* 程序化海面：多层正弦波 + 菲涅尔 + 日光反射 */
+  const seaUniforms = { uTime: { value: 0 }, uSun: { value: sun.position.clone().normalize() } };
+  const sea = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 14, 220, 220),
+    new THREE.ShaderMaterial({
+      uniforms: seaUniforms,
+      vertexShader: `
+        uniform float uTime;
+        varying vec3 vW;
+        float h(vec2 p){
+          float t = uTime;
+          return sin(p.x*9.0 + t*1.1)*0.010
+               + sin(p.y*7.0 - t*0.9)*0.009
+               + sin((p.x+p.y)*15.0 + t*1.7)*0.005
+               + sin(p.x*23.0 - t*2.2)*0.0025;
+        }
+        void main(){
+          vec3 pos = position;
+          pos.z += h(pos.xy);
+          vec4 w = modelMatrix * vec4(pos,1.0);
+          vW = w.xyz;
+          gl_Position = projectionMatrix * viewMatrix * w;
+        }`,
+      fragmentShader: `
+        uniform vec3 uSun;
+        varying vec3 vW;
+        void main(){
+          vec3 dx = dFdx(vW), dy = dFdy(vW);
+          vec3 n = normalize(cross(dx, dy));
+          vec3 v = normalize(cameraPosition - vW);
+          float fres = pow(1.0 - max(dot(n, v), 0.0), 2.4);
+          vec3 deep  = vec3(0.016, 0.062, 0.10);
+          vec3 hor   = vec3(0.055, 0.14, 0.19);
+          vec3 col = mix(deep, hor, fres);
+          float spec = pow(max(dot(reflect(-uSun, n), v), 0.0), 90.0);
+          col += vec3(1.0, 0.72, 0.42) * spec * 0.85;
+          float glit = pow(max(dot(reflect(-uSun, n), v), 0.0), 8.0);
+          col += vec3(0.9, 0.6, 0.35) * glit * 0.06;
+          gl_FragColor = vec4(col, 1.0);
+        }`
+    })
+  );
+  sea.rotation.x = -Math.PI / 2;
+  sea.position.y = -0.365;
+  scene.add(sea);
+
+  /* 潮光岸雾圈：模型水线处的淡光过渡 */
+  const glow = new THREE.Mesh(
+    new THREE.RingGeometry(.55, 1.9, 64),
+    new THREE.MeshBasicMaterial({ color: 0x0e2438, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = -0.299;
+  scene.add(glow);
+
+  let ready = false, dollying = false, clock = new THREE.Clock(), gotBytes = false;
+  /* 下载停滞看门狗：15 秒无字节则提示 */
+  setTimeout(() => {
+    if (!ready && !gotBytes) {
+      const txt = loaderEl.querySelector(".txt");
+      if (txt) { txt.textContent = "模型下载停滞 · 请在浏览器打开 localhost:8766/index.html"; loaderEl.style.color = "#e8b86a"; }
+    }
+  }, 15000);
+  new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(
+    "assets/2回澜阁建筑模型.glb",
+    g => {
+      const m = g.scene;
+      m.traverse(o => { if (o.isMesh) { o.material.envMapIntensity = .6; } });
+      scene.add(m);
+      ready = true;
+      canvas.classList.add("on");
+      loaderEl.classList.add("off");
+    },
+    xhr => {
+      const bar = loaderEl.querySelector(".bar i"), pct = loaderEl.querySelector(".pct");
+      let p = 0;
+      if (xhr.total) p = Math.round(xhr.loaded / xhr.total * 100);
+      else p = Math.min(99, Math.round(xhr.loaded / 98162996 * 100));
+      if (bar) bar.style.width = p + "%";
+      if (pct) pct.textContent = p + "%";
+      if (xhr.loaded > 0) gotBytes = true;
+      const txt = loaderEl.querySelector(".txt");
+      if (txt) txt.textContent = "正在加载鸟瞰模型";
+    },
+    err => {
+      loaderEl.innerHTML = "3D 场景加载失败 · 若直接双击打开请通过预览访问，或刷新重试";
+      console.error(err);
+    }
+  );
+
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    cam.aspect = w / h;
+    cam.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize); resize();
+
+  /* 相机缓慢环绕 + 鼠标视差 */
+  let orbitA = 0;
+  (function loop() {
+    requestAnimationFrame(loop);
+    const dt = clock.getDelta(), t = clock.elapsedTime;
+    seaUniforms.uTime.value = t;
+    if (cur === "home" && !dollying) {
+      orbitA += dt * .022;
+      cx += (mx - cx) * .04; cy += (my - cy) * .04;
+      const r = .72, px = Math.sin(orbitA) * .10;
+      cam.position.set(
+        HOME_POS.x + px + cx * .10,
+        HOME_POS.y - cy * .07 + Math.sin(t * .3) * .006,
+        HOME_POS.z + Math.cos(orbitA) * .06
+      );
+      cam.lookAt(HOME_TGT);
+    }
+    renderer.render(scene, cam);
+  })();
+
+  /* 入阁镜头：平滑推向亭子 */
+  function dollyTo(done) {
+    if (!ready || dollying) { done(); return; }
+    dollying = true;
+    const p0 = cam.position.clone(), t0 = HOME_TGT.clone(), start = performance.now(), D = 1700;
+    (function step(now) {
+      let k = Math.min((now - start) / D, 1);
+      k = 1 - Math.pow(1 - k, 3);
+      cam.position.lerpVectors(p0, PAVI_POS, k);
+      const tg = t0.clone().lerp(PAVI_TGT, k);
+      cam.lookAt(tg);
+      if (k < 1) requestAnimationFrame(step);
+      else { heroText.style.opacity = 0; done(); }
+    })(start);
+  }
+
+  return { dollyTo, get ready() { return ready; } };
+})();
+
+(function parallax() {
+  heroText.style.transform = `translateY(-52%) translate(${cx * 16}px, ${cy * 12}px)`;
+  requestAnimationFrame(parallax);
+})();
+
+function enterTwin(fromSpot) {
+  if (fromSpot && HeroGL.ready) { HeroGL.dollyTo(() => show("twin")); return; }
+  home.style.transformOrigin = fromSpot ? "28% 28%" : "50% 50%";
+  if (fromSpot) home.style.transform = "scale(4.5)";
+  requestAnimationFrame(() => show("twin"));
+}
+document.getElementById("enterBtn").addEventListener("click", e => { e.stopPropagation(); enterTwin(false); });
+document.getElementById("pavSpot").addEventListener("click", e => { e.stopPropagation(); enterTwin(true); });
+document.getElementById("homeBtn").addEventListener("click", () => { home.style.transform = ""; if (window.HeroGL) HeroGL.reset(); show("home"); });
+document.getElementById("backTwinBtn").addEventListener("click", () => { show("twin"); unpin(); });
+document.getElementById("stage").addEventListener("click", e => {
+  if (cur !== "twin") return;
+  if (TwinGL.pick(e.clientX, e.clientY)) show("explode");
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (cur === "explode") { show("twin"); unpin(); }
+  else if (cur === "twin") { home.style.transform = ""; HeroGL.reset(); show("home"); }
+});
+
+/* ================= 孪生场景 · Three.js ================= */
+const TwinGL = (function () {
+  const canvas = document.getElementById("twinGL");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(38, 1, .01, 30);
+  cam.position.set(.85, .58, 1.12);
+
+  scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x161d29, .5));
+  const key = new THREE.DirectionalLight(0xffd9a6, 1.6);
+  key.position.set(.7, 1, .5);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x6fa8dc, .7);
+  rim.position.set(-.8, .5, -.6);
+  scene.add(rim);
+
+  const controls = new THREE.OrbitControls(cam, canvas);
+  controls.target.set(0, .16, -.14);
+  controls.enableDamping = true;
+  controls.dampingFactor = .06;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = .9;
+  controls.minDistance = .45;
+  controls.maxDistance = 2.6;
+  controls.maxPolarAngle = Math.PI * .52;
+  controls.enablePan = false;
+
+  let buildingMeshes = [], twinReady = false;
+  const mBadge = document.getElementById("mBadge");
+  const twinLoad = document.getElementById("twinLoad");
+  new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(MODEL_SRC,
+    g => {
+      g.scene.traverse(o => { if (o.isMesh) buildingMeshes.push(o); });
+      scene.add(g.scene);
+      twinReady = true;
+      twinLoad.classList.add("off");
+      mBadge.textContent = "拖拽旋转 · 滚轮缩放 · 单击建筑展开解构";
+    },
+    xhr => {
+      const bar = twinLoad.querySelector(".bar i"), pct = twinLoad.querySelector(".pct2");
+      let p = 0;
+      if (xhr.total) p = Math.round(xhr.loaded / xhr.total * 100);
+      else p = Math.min(99, Math.round(xhr.loaded / 98162996 * 100));
+      if (bar) bar.style.width = p + "%";
+      if (pct) pct.textContent = p + "%";
+    },
+    err => {
+      twinLoad.querySelector("span").textContent = "建筑模型加载失败 · 请刷新重试";
+      console.error(err);
+    }
+  );
+
+  /* 拾取：判断屏幕坐标是否点在建筑上 */
+  const ray = new THREE.Raycaster(), v2 = new THREE.Vector2();
+  function pick(cx, cy) {
+    if (!buildingMeshes.length) return false;
+    const r = canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return false;
+    v2.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(v2, cam);
+    return ray.intersectObjects(buildingMeshes, false).length > 0;
+  }
+
+  function resize() {
+    const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+    const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    cam.aspect = w / h;
+    cam.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize);
+  requestAnimationFrame(resize);
+
+  const clock2 = new THREE.Clock();
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (cur !== "twin") return;
+    controls.update();
+    renderer.render(scene, cam);
+    clock2.getDelta();
+  })();
+
+  return { pick };
+})();
+
+/* 悬停建筑显示手型 */
+document.getElementById("stage").addEventListener("mousemove", e => {
+  const el = document.getElementById("stage");
+  el.style.cursor = (cur === "twin" && TwinGL.pick(e.clientX, e.clientY)) ? "pointer" : "grab";
+});
+
+/* ================= 解构分析：真 3D 爆炸 ================= */
+const layerList = document.getElementById("layerList");
+const iNo = document.getElementById("iNo"), iName = document.getElementById("iName"),
+      iEn = document.getElementById("iEn"), iDesc = document.getElementById("iDesc");
+
+/* 9 个结构层（对应 9层.glb 的 part_0~8，自上而下；part 字段 = GLB 内实际部件号） */
+const LAYERS = [
+  { no:"01", name:"宝顶",       en:"FINIAL",           part:6,
+    desc:"铜制鎏金宝顶，压合上层锥形屋面的各坡交点，是全阁的最高点与天际线收束。" },
+  { no:"02", name:"上层屋面",   en:"UPPER ROOF",       part:0,
+    desc:"上层金色琉璃锥形屋面，重檐制式的顶檐，八坡汇聚于宝顶，翼角轻扬。" },
+  { no:"03", name:"上层椽架",   en:"RAFTER FRAME",     part:8,
+    desc:"放射状木椽骨架，承接上层屋面瓦作，将荷载传递至下方圈梁与斗拱。" },
+  { no:"04", name:"上层圈枋",   en:"UPPER FRIEZE",     part:5,
+    desc:"上层檐下圈枋与封护板带，环合八角，衔接椽架与平座，兼作装饰线脚。" },
+  { no:"05", name:"平座栏杆",   en:"BALCONY RAILING",  part:4,
+    desc:"二层外廊平座栏杆，红色寻杖栏杆环列八角，可凭栏远眺，匾额悬于其上。" },
+  { no:"06", name:"下层屋面",   en:"LOWER ROOF",       part:7,
+    desc:"下层金色琉璃瓦屋面，八角重檐的下檐，檐角设走兽，出檐深远。" },
+  { no:"07", name:"下层斗拱圈", en:"BRACKET RING",     part:3,
+    desc:"下层檐口斗拱与额枋圈带，层层出挑承托屋面，是传统木构的力学核心。" },
+  { no:"08", name:"下层柱廊",   en:"COLONNADE",        part:1,
+    desc:"一层红柱环列的柱廊墙体，门洞、窗格与柱础齐备，为游客主要观览层。" },
+  { no:"09", name:"台基",       en:"BASE",             part:2,
+    desc:"八角形花岗岩台基，收束全阁荷载，与栈桥相连，将建筑托举于海面之上。" },
+];
+/* 部件号 → 列表序号 反查表（点击 3D 部件时定位列表） */
+const partToIdx = {}; LAYERS.forEach((L, i) => partToIdx[L.part] = i);
+
+/* 右侧层级列表 */
+LAYERS.forEach(L => {
+  const ly = document.createElement("div");
+  ly.className = "ly";
+  ly.dataset.part = L.part;
+  ly.innerHTML = `<span class="n">${L.no}</span><span class="nm">${L.name}</span>`;
+  layerList.appendChild(ly);
+});
+const lyEls = [...layerList.querySelectorAll(".ly")];
+let pinned = -1;
+
+function setInfo(L) {
+  iNo.textContent = L.no; iName.textContent = L.name;
+  iEn.textContent = L.en; iDesc.textContent = L.desc;
+}
+function resetInfo() {
+  iNo.textContent = "九层"; iName.textContent = "回澜阁 · 结构解构";
+  iEn.textContent = "EXPLODED VIEW";
+  iDesc.textContent = "单击建筑可展开九层结构爆炸；拖拽旋转查看，鼠标悬停各层高亮并显示构造说明。";
+}
+function highlightPart(idx, on) {
+  lyEls.forEach((x, i) => x.classList.toggle("pin", on && i === idx));
+  /* idx 是列表序号；ExpGL 用 GLB 部件号索引，需经 LAYERS[idx].part 转换 */
+  if (window.ExpGL) ExpGL.highlight(idx < 0 ? -1 : LAYERS[idx].part, on);
+}
+function unpin() {
+  pinned = -1;
+  highlightPart(-1, false);
+  resetInfo();
+  if (window.ExpGL) ExpGL.highlight(-1, false);
+}
+
+lyEls.forEach((ly, idx) => {
+  ly.addEventListener("mouseenter", () => { setInfo(LAYERS[idx]); highlightPart(idx, true); });
+  ly.addEventListener("mouseleave", () => { if (pinned !== idx) { highlightPart(idx, false); resetInfo(); } });
+  ly.addEventListener("click", () => {
+    if (pinned === idx) { unpin(); }
+    else { pinned = idx; setInfo(LAYERS[idx]); highlightPart(idx, true); }
+  });
+});
+
+/* ================= 爆炸 3D 场景（Three.js） ================= */
+window.ExpGL = (function () {
+  const canvas = document.getElementById("expGL");
+  const loaderEl = document.getElementById("expLoad");
+  const badge = document.getElementById("expBadge");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  const scene = new THREE.Scene();
+  /* GLB 原始坐标里建筑"上方"是 -Z（宝顶在 z≈-1.03，台基在 z≈0）。
+     expRoot 旋转 +90°X：-Z → 世界 +Y（上方），部件几何因此转正；
+     相应地 position.z 取负后作为堆叠高度（正值=向上）。 */
+  const expRoot = new THREE.Group();
+  expRoot.rotation.x = Math.PI / 2;
+  scene.add(expRoot);
+  const cam = new THREE.PerspectiveCamera(40, 1, .01, 50);
+  cam.position.set(1.45, -0.75, 3.7);
+
+  scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x161d29, .55));
+  const key = new THREE.DirectionalLight(0xffd9a6, 1.7);
+  key.position.set(.7, 1.1, .6);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x6fa8dc, .7);
+  rim.position.set(-.8, .5, -.6);
+  scene.add(rim);
+
+  const controls = new THREE.OrbitControls(cam, canvas);
+  controls.target.set(0, -0.85, 0);
+  controls.enableDamping = true;
+  controls.dampingFactor = .08;
+  controls.minDistance = 1.0;
+  controls.maxDistance = 9.0;
+  controls.maxPolarAngle = Math.PI * .52;
+  controls.enablePan = false;
+
+  let parts = [];          // { mesh, mat, baseZ, origCenter, exploded }
+  let exploded = false;
+  let ready = false;
+
+  /* 贴合态：模型自带"上下"是 Z 轴。9层.glb 共 9 个部件 part_0~8，
+     按 LAYERS 顺序（顶→底）：6,0,8,5,4,7,3,1,2。各部件几何已平移至自身中心为原点，
+     下面是贴合堆叠时的绝对 z（紧凑，层间略有搭接）。 */
+  const packedZ = [0.37, 0.24, 0.36, 0.45, 0.69, 1.06, 1.33, 1.50, 1.62];
+  /* 爆炸态：层间均匀拉开约 0.18 的净空，宝顶上抬，观感对齐拆分参考图。
+     宝顶(part_6)因杂面导致几何中心偏移 +0.29，z 值已补偿 */
+  const spreadZ = [0.11, 0.15, 0.42, 0.67, 0.98, 1.36, 1.69, 2.01, 2.28];
+
+  new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(
+    "assets/9层.glb",
+    g => {
+      const meshes = [];
+      g.scene.traverse(o => { if (o.isMesh) meshes.push(o); });
+      /* 按部件名中的数字排序，确保 part_0~part_8 顺序稳定 */
+      meshes.sort((a, b) => {
+        const na = parseInt((a.name || "").replace(/\D/g, ""), 10) || 0;
+        const nb = parseInt((b.name || "").replace(/\D/g, ""), 10) || 0;
+        return na - nb;
+      });
+      meshes.forEach((m, i) => {
+        m.geometry.computeBoundingBox();
+        const bb = m.geometry.boundingBox;
+        const center = new THREE.Vector3();
+        bb.getCenter(center);
+        /* 将每个部件的顶点平移到以自身中心为原点，便于做位移动画 */
+        m.geometry.translate(-center.x, -center.y, -center.z);
+        /* 清掉 GLB 节点自带的 +90°X 旋转，朝向统一交给 expRoot 处理 */
+        m.rotation.set(0, 0, 0);
+        m.updateMatrix();
+        /* 为每个部件克隆独立材质，避免高亮串扰 */
+        let mat = Array.isArray(m.material) ? m.material[0] : m.material;
+        if (mat) mat = mat.clone();
+        m.material = mat;
+        const rec = { mesh: m, mat, index: i };
+        parts.push(rec);
+        expRoot.add(m);
+      });
+      /* 初始贴合态：把各部件移到紧凑 z 序列 */
+      setExploded(false, true);
+      ready = true;
+      loaderEl.classList.add("off");
+      badge.textContent = "拖拽旋转 · 单击建筑爆炸解构";
+    },
+    xhr => {
+      const bar = loaderEl.querySelector(".bar i"), pct = loaderEl.querySelector(".pct");
+      let p = 0;
+      if (xhr.total) p = Math.round(xhr.loaded / xhr.total * 100);
+      else p = Math.min(99, Math.round(xhr.loaded / 47000000 * 100));
+      if (bar) bar.style.width = p + "%";
+      if (pct) pct.textContent = p + "%";
+    },
+    err => {
+      loaderEl.querySelector(".txt").textContent = "爆炸模型加载失败 · 请刷新重试";
+      console.error(err);
+    }
+  );
+
+  /* 设置爆炸/贴合：parts 数组按部件号排序，坐标数组按 LAYERS 列表顺序，
+     必须经 partToIdx 把部件号转成列表序号再取目标 z；对焦高度随状态联动 */
+  const FOCUS_Y = { packed: -0.85, spread: -1.10 };
+  function setExploded(on, instant) {
+    exploded = on;
+    const targetZ = on ? spreadZ : packedZ;
+    const ty = on ? FOCUS_Y.spread : FOCUS_Y.packed;
+    if (instant) { controls.target.y = ty; }
+    else { gsapTween(controls.target, "y", ty, 0); }
+    parts.forEach((p, i) => {
+      const li = partToIdx[i];
+      const tz = (li !== undefined && targetZ[li] !== undefined) ? targetZ[li] : 0;
+      if (instant) { p.mesh.position.z = tz; }
+      else {
+        gsapTween(p.mesh.position, "z", tz, i * 90);
+      }
+    });
+  }
+  /* 简易 tween（不引 gsap，自写） */
+  const tweens = [];
+  function gsapTween(obj, prop, target, delay) {
+    const start = obj[prop], diff = target - start;
+    const begin = performance.now() + delay;
+    tweens.push({ obj, prop, start, diff, target, begin, dur: 900 });
+  }
+
+  /* 高亮某个部件：其余变暗，目标发光 */
+  function highlight(idx, on) {
+    if (!ready) return;
+    parts.forEach((p, i) => {
+      const m = p.mat;
+      if (!m || m.emissive === undefined) return;
+      const isTarget = on && i === idx;
+      if (isTarget) {
+        m.emissive.set(0x402800);
+        m.emissiveIntensity = 1.6;
+      } else {
+        m.emissive.set(0x000000);
+        m.emissiveIntensity = 0;
+      }
+    });
+  }
+
+  /* 拾取：点击判断是否点到建筑 */
+  const ray = new THREE.Raycaster(), v2 = new THREE.Vector2();
+  function pick(cx, cy) {
+    if (!ready) return -1;
+    const r = canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return -1;
+    v2.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(v2, cam);
+    const hits = ray.intersectObjects(parts.map(p => p.mesh), false);
+    if (!hits.length) return -1;
+    return parts.findIndex(p => p.mesh === hits[0].object);
+  }
+
+  /* 悬停 3D 部件：触碰高亮 + 文字解读（未固定时生效） */
+  canvas.addEventListener("mousemove", e => {
+    if (!ready) return;
+    const pi = pick(e.clientX, e.clientY);
+    canvas.style.cursor = pi >= 0 ? "pointer" : "grab";
+    if (pinned >= 0) return;          // 已固定某层时不跟随悬停
+    if (pi >= 0) {
+      const li = partToIdx[pi];
+      setInfo(LAYERS[li]);
+      highlightPart(li, true);
+    } else {
+      unpin();
+    }
+  });
+  canvas.addEventListener("mouseleave", () => {
+    if (pinned < 0) unpin();
+  });
+
+  /* 点击画布：有部件则切换爆炸/贴合；点到部件则高亮该部件 */
+  canvas.addEventListener("click", e => {
+    if (!ready) return;
+    const pi = pick(e.clientX, e.clientY);
+    if (pi >= 0) {
+      /* 点到部件：部件号转列表序号，固定高亮该层 */
+      const idx = partToIdx[pi];
+      if (pinned === idx) unpin();
+      else { pinned = idx; setInfo(LAYERS[idx]); highlightPart(idx, true); }
+    } else {
+      /* 点到空白：切换爆炸/贴合 */
+      setExploded(!exploded, false);
+      badge.textContent = exploded ? "已爆炸 · 再点收拢" : "已收拢 · 点击建筑爆炸";
+    }
+  });
+
+  function resize() {
+    const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+    const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    cam.aspect = w / h;
+    cam.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize);
+  requestAnimationFrame(resize);
+
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (cur !== "explode") return;
+    /* 处理 tween */
+    const now = performance.now();
+    for (let i = tweens.length - 1; i >= 0; i--) {
+      const t = tweens[i];
+      let k = (now - t.begin) / t.dur;
+      if (k >= 1) { t.obj[t.prop] = t.target; tweens.splice(i, 1); continue; }
+      k = 1 - Math.pow(1 - k, 3);
+      t.obj[t.prop] = t.start + t.diff * k;
+    }
+    controls.update();
+    renderer.render(scene, cam);
+  })();
+
+  return { highlight, pick, setExploded, get exploded() { return exploded; }, get ready() { return ready }, get partsDebug() { const v = new THREE.Vector3(); return parts.map(p => { p.mesh.getWorldPosition(v); return { n: p.mesh.name, z: +p.mesh.position.z.toFixed(3), w: [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)], rot: p.mesh.rotation.x ? "R" : "-" }; }); } };
+})();
+
+/* ================= 背景等高线 ================= */
+const bgcv = document.getElementById("bgcv");
+const bctx = bgcv.getContext("2d");
+let BW = 0, BH = 0;
+function resizeBg() { BW = bgcv.width = innerWidth; BH = bgcv.height = innerHeight; }
+window.addEventListener("resize", resizeBg); resizeBg();
+(function bgLoop() {
+  const t = performance.now() / 1000;
+  bctx.clearRect(0, 0, BW, BH);
+  for (let i = 0; i < 9; i++) {
+    const yBase = BH * (0.12 + i * 0.095);
+    bctx.strokeStyle = i % 3 === 0 ? "rgba(232,201,138,.05)" : "rgba(120,180,200,.035)";
+    bctx.lineWidth = 1;
+    bctx.beginPath();
+    for (let x = 0; x <= BW; x += 10) {
+      const y = yBase + Math.sin(x * .004 + t * .25 + i * 1.4) * 26 + Math.sin(x * .011 - t * .16 + i) * 9;
+      x === 0 ? bctx.moveTo(x, y) : bctx.lineTo(x, y);
+    }
+    bctx.stroke();
+  }
+  requestAnimationFrame(bgLoop);
+})();
+
+/* ================= 时钟 ================= */
+function clock() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  document.getElementById("clockT").textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  document.getElementById("clockD").textContent = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} 星期${"日一二三四五六"[d.getDay()]}`;
+}
+clock(); setInterval(clock, 1000);
+
+/* ================= 数据模拟 ================= */
+const state = { tide: 3.2, wave: .8, wind: 4.6, temp: 24.3, hum: 68, vis: 9.2, inNum: 216, dayNum: 1847, tilt: .02 };
+const tideBuf = [], flowBuf = [];
+for (let i = 0; i < 60; i++) tideBuf.push(3.2 + 1.3 * Math.sin(i / 60 * Math.PI * 2));
+for (let i = 0; i < 13; i++) flowBuf.push(40 + Math.sin(i / 12 * Math.PI) * 120 + Math.random() * 30);
+function tick() {
+  state.tide = 3.2 + 1.3 * Math.sin(Date.now() / 60000 * Math.PI * 2) + (Math.random() - .5) * .06;
+  state.wave = Math.max(.2, .8 + Math.sin(Date.now() / 47000) * .3 + (Math.random() - .5) * .05);
+  state.wind = Math.min(9, Math.max(1.5, state.wind + (Math.random() - .5) * .4));
+  state.temp += (Math.random() - .5) * .1;
+  state.hum = Math.min(95, Math.max(45, state.hum + (Math.random() - .5) * 1.2));
+  state.vis = Math.min(12, Math.max(3, state.vis + (Math.random() - .5) * .2));
+  const target = 180 + Math.sin(Date.now() / 90000) * 60;
+  state.inNum = Math.max(20, Math.round(state.inNum + (target - state.inNum) * .1 + (Math.random() - .5) * 8));
+  if (Math.random() < .6) state.dayNum++;
+  state.tilt = Math.max(0, .02 + (Math.random() - .5) * .004);
+  tideBuf.push(state.tide); tideBuf.shift();
+  flowBuf.push(state.inNum * .18); flowBuf.shift();
+  setText("tideNum", state.tide.toFixed(2)); setText("waveNum", state.wave.toFixed(2));
+  setText("windNum", state.wind.toFixed(1)); setText("tempNum", state.temp.toFixed(1));
+  setText("humNum", Math.round(state.hum)); setText("visNum", state.vis.toFixed(1));
+  setText("inNum", state.inNum); setText("dayNum", state.dayNum.toLocaleString());
+  setText("tiltNum", state.tilt.toFixed(2));
+  drawTide(); drawFlow();
+}
+function setText(id, v) { document.getElementById(id).firstChild.nodeValue = v; }
+function drawTide() {
+  const c = document.getElementById("tideChart"), g = c.getContext("2d");
+  const w = c.width, h = c.height;
+  g.clearRect(0, 0, w, h);
+  const min = Math.min(...tideBuf) - .15, max = Math.max(...tideBuf) + .15;
+  g.strokeStyle = "rgba(232,201,138,.12)";
+  [0.25, 0.5, 0.75].forEach(f => { g.beginPath(); g.moveTo(0, h * f); g.lineTo(w, h * f); g.stroke(); });
+  g.beginPath();
+  tideBuf.forEach((v, i) => {
+    const x = i / (tideBuf.length - 1) * w, y = h - (v - min) / (max - min) * (h - 8) - 4;
+    i === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+  });
+  g.strokeStyle = "#e8c98a"; g.lineWidth = 1.5; g.stroke();
+  g.lineTo(w, h); g.lineTo(0, h); g.closePath();
+  const fill = g.createLinearGradient(0, 0, 0, h);
+  fill.addColorStop(0, "rgba(232,201,138,.2)"); fill.addColorStop(1, "rgba(232,201,138,0)");
+  g.fillStyle = fill; g.fill();
+  const ly = h - (tideBuf[tideBuf.length - 1] - min) / (max - min) * (h - 8) - 4;
+  g.fillStyle = "#e8c98a"; g.beginPath(); g.arc(w - 1, ly, 2.4, 0, 7); g.fill();
+}
+function drawFlow() {
+  const c = document.getElementById("flowChart"), g = c.getContext("2d");
+  const w = c.width, h = c.height, n = flowBuf.length;
+  g.clearRect(0, 0, w, h);
+  const max = Math.max(...flowBuf) * 1.15, bw = w / n * .52;
+  flowBuf.forEach((v, i) => {
+    const bh = v / max * (h - 6), x = i / n * w + (w / n - bw) / 2;
+    g.fillStyle = i === n - 1 ? "rgba(77,216,255,.85)" : "rgba(232,201,138,.4)";
+    g.fillRect(x, h - bh, bw, bh);
+  });
+}
+tick(); setInterval(tick, 2000);
+</script>
+</body>
+</html>

@@ -142,6 +142,21 @@ img{display:block;}
 #bg{position:fixed;inset:0;z-index:0;}
 #bg canvas{display:block;}
 
+/* ---- 幕帘转场（首页 ⇄ 孪生 的仪式感过场） ---- */
+#veil{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  background:radial-gradient(120% 100% at 50% 42%,#0c1522 0%,#060a10 62%,#020407 100%);
+  transition:opacity .55s ease,visibility 0s .55s;}
+#veil.on{opacity:1;visibility:visible;pointer-events:all;transition:opacity .55s ease;}
+#veil .v-title{font-family:var(--serif);font-size:30px;letter-spacing:.62em;text-indent:.62em;
+  color:#f0e9d8;opacity:0;transform:translateY(16px);transition:.75s var(--ease) .18s;}
+#veil .v-ln{width:130px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  transform:scaleX(0);transition:transform .9s var(--ease) .3s;}
+#veil .v-sub{font-size:10px;letter-spacing:.52em;text-indent:.52em;color:var(--gold);
+  opacity:0;transform:translateY(12px);transition:.75s var(--ease) .3s;}
+#veil.on .v-title,#veil.on .v-sub{opacity:1;transform:none;}
+#veil.on .v-ln{transform:scaleX(1);}
+
 /* 顶栏 */
 header{position:absolute;top:0;left:0;right:0;height:60px;z-index:6;
   display:flex;align-items:center;justify-content:space-between;padding:0 20px;
@@ -216,13 +231,32 @@ header>*{pointer-events:auto;}
 
 /* ================= ③ 解构分析 ================= */
 #explode{background:rgba(4,6,8,.55);backdrop-filter:blur(6px);}
-#explode .sheet-wrap{position:absolute;inset:64px 330px 20px 20px;display:flex;
+#explode .sheet-wrap{position:absolute;inset:70px 340px 26px 26px;display:flex;
   align-items:center;justify-content:center;}
 #explode .sheet3d{position:relative;height:100%;aspect-ratio:1/1;max-width:100%;
-  border-radius:6px;overflow:hidden;background:radial-gradient(120% 120% at 50% 30%,#10161f 0%,#07090d 70%);
+  border-radius:6px;overflow:hidden;
+  background:repeating-linear-gradient(0deg,rgba(232,201,138,.03) 0 1px,transparent 1px 46px),
+             repeating-linear-gradient(90deg,rgba(232,201,138,.03) 0 1px,transparent 1px 46px),
+             radial-gradient(120% 120% at 50% 30%,#10161f 0%,#07090d 70%);
   box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 0 1px rgba(232,201,138,.25);
   animation:sheetIn .9s var(--ease);}
 @keyframes sheetIn{from{opacity:0;transform:translateY(26px) scale(.97);}to{opacity:1;transform:none;}}
+/* 图纸角标 + 底部光晕 */
+#explode .cnr{position:absolute;width:26px;height:26px;z-index:4;pointer-events:none;
+  border:1px solid rgba(232,201,138,.7);}
+#explode .cnr.tl{left:9px;top:9px;border-right:none;border-bottom:none;}
+#explode .cnr.tr{right:9px;top:9px;border-left:none;border-bottom:none;}
+#explode .cnr.bl{left:9px;bottom:9px;border-right:none;border-top:none;}
+#explode .cnr.br{right:9px;bottom:9px;border-left:none;border-top:none;}
+#explode .floor-glow{position:absolute;left:50%;bottom:5%;width:72%;height:15%;
+  transform:translateX(-50%);z-index:1;pointer-events:none;filter:blur(5px);
+  background:radial-gradient(ellipse,rgba(232,201,138,.16),rgba(77,216,255,.06) 55%,transparent 74%);}
+/* 展开/收拢按钮 */
+#explode .exp-toggle{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;
+  border:1px solid rgba(232,201,138,.55);background:rgba(8,10,10,.72);backdrop-filter:blur(8px);
+  color:var(--gold);font-family:var(--sans);font-size:11px;letter-spacing:.28em;padding:9px 24px;
+  cursor:pointer;transition:.3s var(--ease);}
+#explode .exp-toggle:hover{background:rgba(232,201,138,.16);letter-spacing:.34em;}
 #explode .sheet3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;}
 #explode .exp-badge{position:absolute;left:14px;bottom:12px;z-index:5;font-size:11px;
   letter-spacing:.12em;color:rgba(233,228,216,.6);padding:6px 12px;border-radius:3px;
@@ -270,6 +304,7 @@ header>*{pointer-events:auto;}
 <div id="bg" data-page-node-id="D8KACt9AUEk5gCeMFtFhXY"><canvas id="bgcv" data-page-node-id="Fqx8nbdjoaWmidGwTvEcxK"></canvas></div>
 <div class="vignette" data-page-node-id="21F8QnDX0p2KtfcFvFLGi3"></div>
 <div class="scanline" data-page-node-id="F4THtyZM8HrpYJ8znrwEvR"></div>
+<div id="veil"><div class="v-title">回澜阁</div><div class="v-ln"></div><div class="v-sub">观澜之上 · 数字孪生</div></div>
 
 <!-- ================= ① 首页 ================= -->
 <div id="home" data-page-node-id="WMGsfZIwISkacAVZ1ObkMj">
@@ -395,7 +430,10 @@ header>*{pointer-events:auto;}
   <div class="sheet-wrap" data-page-node-id="PGjBH9BXcFObvFekkrgDxH">
     <div class="sheet3d" id="sheet3d" data-page-node-id="vBcFrgzcjWOtlYcWll4UiC">
       <canvas id="expGL" data-page-node-id="XwFUFUSmWz8ekFsasqyRDU"></canvas>
+      <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+      <div class="floor-glow"></div>
       <div class="exp-badge" id="expBadge">拖拽旋转 · 单击建筑爆炸解构</div>
+      <button class="exp-toggle" id="expToggle">展开九层结构</button>
       <div id="expLoad"><span class="spin"></span><span class="txt">正在加载爆炸模型</span><span class="bar"><i></i></span><span class="pct">0%</span></div>
     </div>
   </div>
@@ -644,23 +682,32 @@ const HeroGL = (function () {
     renderer.render(scene, cam);
   })();
 
-  /* 入阁镜头：平滑推向亭子 */
+  /* 入阁镜头：缓入缓出 + FOV 收束 + 弧线偏移，结尾交给幕帘转场 */
   function dollyTo(done) {
     if (!ready || dollying) { done(); return; }
     dollying = true;
-    const p0 = cam.position.clone(), t0 = HOME_TGT.clone(), start = performance.now(), D = 1700;
+    const p0 = cam.position.clone(), t0 = HOME_TGT.clone(), start = performance.now(), D = 2300;
+    const fov0 = cam.fov;
     (function step(now) {
       let k = Math.min((now - start) / D, 1);
-      k = 1 - Math.pow(1 - k, 3);
-      cam.position.lerpVectors(p0, PAVI_POS, k);
-      const tg = t0.clone().lerp(PAVI_TGT, k);
-      cam.lookAt(tg);
+      const e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;  /* easeInOutCubic */
+      cam.position.lerpVectors(p0, PAVI_POS, e);
+      cam.position.x += Math.sin(e * Math.PI) * .05;       /* 轻微弧线，避免直线推进 */
+      cam.lookAt(t0.clone().lerp(PAVI_TGT, e));
+      cam.fov = fov0 - 7 * Math.sin(e * Math.PI);          /* 推近时视野收束，增强纵深感 */
+      cam.updateProjectionMatrix();
       if (k < 1) requestAnimationFrame(step);
       else { heroText.style.opacity = 0; done(); }
     })(start);
   }
 
-  return { dollyTo, get ready() { return ready; } };
+  function reset() {
+    dollying = false; introT = 1;
+    cam.fov = 40; cam.updateProjectionMatrix();
+    heroText.style.opacity = "";
+  }
+
+  return { dollyTo, reset, get ready() { return ready; } };
 })();
 
 (function parallax() {
@@ -668,24 +715,49 @@ const HeroGL = (function () {
   requestAnimationFrame(parallax);
 })();
 
+/* ============ 幕帘转场：首页 ⇄ 孪生 ============ */
+const veil = document.getElementById("veil");
+let entering = false;
+function veilSwap(swapFn, holdMs) {
+  if (entering) return;
+  entering = true;
+  veil.classList.add("on");
+  setTimeout(() => {
+    swapFn();
+    setTimeout(() => { veil.classList.remove("on"); entering = false; }, 430);
+  }, holdMs);
+}
 function enterTwin(fromSpot) {
-  if (fromSpot && HeroGL.ready) { HeroGL.dollyTo(() => show("twin")); return; }
-  home.style.transformOrigin = fromSpot ? "28% 28%" : "50% 50%";
-  if (fromSpot) home.style.transform = "scale(4.5)";
-  requestAnimationFrame(() => show("twin"));
+  if (fromSpot && HeroGL.ready) {
+    HeroGL.dollyTo(() => veilSwap(() => { show("twin"); TwinGL.enterIntro(); }, 620));
+  } else {
+    veilSwap(() => { show("twin"); TwinGL.enterIntro(); }, 880);
+  }
+}
+function goHome() {
+  veilSwap(() => { HeroGL.reset(); show("home"); }, 700);
 }
 document.getElementById("enterBtn").addEventListener("click", e => { e.stopPropagation(); enterTwin(false); });
 document.getElementById("pavSpot").addEventListener("click", e => { e.stopPropagation(); enterTwin(true); });
-document.getElementById("homeBtn").addEventListener("click", () => { home.style.transform = ""; if (window.HeroGL) HeroGL.reset(); show("home"); });
+document.getElementById("homeBtn").addEventListener("click", () => goHome());
 document.getElementById("backTwinBtn").addEventListener("click", () => { show("twin"); unpin(); });
 document.getElementById("stage").addEventListener("click", e => {
   if (cur !== "twin") return;
-  if (TwinGL.pick(e.clientX, e.clientY)) show("explode");
+  if (TwinGL.pick(e.clientX, e.clientY)) {
+    show("explode"); unpin();
+    /* 进入解构页后自动播放一次爆炸，0.5s 后展开 */
+    setTimeout(() => {
+      if (cur === "explode" && window.ExpGL && ExpGL.ready && !ExpGL.exploded) {
+        ExpGL.setExploded(true, false);
+        if (window.syncExpUI) syncExpUI();
+      }
+    }, 520);
+  }
 });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (cur === "explode") { show("twin"); unpin(); }
-  else if (cur === "twin") { home.style.transform = ""; HeroGL.reset(); show("home"); }
+  else if (cur === "twin") goHome();
 });
 
 /* ================= 孪生场景 · Three.js ================= */
@@ -699,7 +771,9 @@ const TwinGL = (function () {
 
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(38, 1, .01, 30);
-  cam.position.set(.85, .58, 1.12);
+  const TWIN_HOME = new THREE.Vector3(.88, .62, 1.18);
+  const TWIN_FROM = new THREE.Vector3(1.78, 1.18, 2.08);   /* 入场镜头起点：远、高 */
+  cam.position.copy(TWIN_HOME);
 
   scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x161d29, .5));
   const key = new THREE.DirectionalLight(0xffd9a6, 1.6);
@@ -710,7 +784,7 @@ const TwinGL = (function () {
   scene.add(rim);
 
   const controls = new THREE.OrbitControls(cam, canvas);
-  controls.target.set(0, .16, -.14);
+  controls.target.set(0, .18, -.14);
   controls.enableDamping = true;
   controls.dampingFactor = .06;
   controls.autoRotate = true;
@@ -767,16 +841,33 @@ const TwinGL = (function () {
   addEventListener("resize", resize);
   requestAnimationFrame(resize);
 
+  /* 入场镜头：由远及近缓推 1.6s，结束后交还轨道控制 */
+  let introMs = -1;
+  function enterIntro() { introMs = 0; controls.enabled = false; controls.autoRotate = false; }
   const clock2 = new THREE.Clock();
   (function loop() {
     requestAnimationFrame(loop);
     if (cur !== "twin") return;
+    if (introMs >= 0) {
+      if (introMs === 0) introMs = performance.now();
+      const k = (performance.now() - introMs) / 1600;
+      if (k >= 1) {
+        introMs = -1; controls.enabled = true; controls.autoRotate = true;
+      } else {
+        const e = 1 - Math.pow(1 - k, 3);
+        cam.position.lerpVectors(TWIN_FROM, TWIN_HOME, e);
+        cam.lookAt(controls.target);
+        renderer.render(scene, cam);
+        clock2.getDelta();
+        return;
+      }
+    }
     controls.update();
     renderer.render(scene, cam);
     clock2.getDelta();
   })();
 
-  return { pick };
+  return { pick, enterIntro };
 })();
 
 /* 悬停建筑显示手型 */
@@ -901,9 +992,9 @@ window.ExpGL = (function () {
      按 LAYERS 顺序（顶→底）：6,0,8,5,4,7,3,1,2。各部件几何已平移至自身中心为原点，
      下面是贴合堆叠时的绝对 z（紧凑，层间略有搭接）。 */
   const packedZ = [0.37, 0.24, 0.36, 0.45, 0.69, 1.06, 1.33, 1.50, 1.62];
-  /* 爆炸态：层间均匀拉开约 0.18 的净空，宝顶上抬，观感对齐拆分参考图。
+  /* 爆炸态：层间均匀拉开，宝顶上抬；爆炸时用回弹缓动 + 层次微旋，观感更有张力。
      宝顶(part_6)因杂面导致几何中心偏移 +0.29，z 值已补偿 */
-  const spreadZ = [0.11, 0.15, 0.42, 0.67, 0.98, 1.36, 1.69, 2.01, 2.28];
+  const spreadZ = [0.05, 0.12, 0.40, 0.68, 1.00, 1.38, 1.72, 2.06, 2.38];
 
   new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(
     "assets/9层.glb",
@@ -929,6 +1020,7 @@ window.ExpGL = (function () {
         /* 为每个部件克隆独立材质，避免高亮串扰 */
         let mat = Array.isArray(m.material) ? m.material[0] : m.material;
         if (mat) mat = mat.clone();
+        if (mat) mat.userData.base = mat.color.clone();   /* 记录原色，供高亮压暗恢复 */
         m.material = mat;
         const rec = { mesh: m, mat, index: i };
         parts.push(rec);
@@ -956,7 +1048,7 @@ window.ExpGL = (function () {
 
   /* 设置爆炸/贴合：parts 数组按部件号排序，坐标数组按 LAYERS 列表顺序，
      必须经 partToIdx 把部件号转成列表序号再取目标 z；对焦高度随状态联动 */
-  const FOCUS_Y = { packed: -0.85, spread: -1.10 };
+  const FOCUS_Y = { packed: -0.85, spread: -1.16 };
   function setExploded(on, instant) {
     exploded = on;
     const targetZ = on ? spreadZ : packedZ;
@@ -968,19 +1060,24 @@ window.ExpGL = (function () {
       const tz = (li !== undefined && targetZ[li] !== undefined) ? targetZ[li] : 0;
       if (instant) { p.mesh.position.z = tz; }
       else {
-        gsapTween(p.mesh.position, "z", tz, i * 90);
+        /* 爆炸：回弹缓动 + 交替微旋；收拢：平滑缓动归位 */
+        gsapTween(p.mesh.position, "z", tz, i * 110,
+          { back: on, mesh: p.mesh, wig: on ? (i % 2 ? .10 : -.10) : 0 });
       }
     });
   }
-  /* 简易 tween（不引 gsap，自写） */
+  /* 简易 tween（不引 gsap，自写）；支持回弹缓动与爆炸微旋 */
   const tweens = [];
-  function gsapTween(obj, prop, target, delay) {
-    const start = obj[prop], diff = target - start;
-    const begin = performance.now() + delay;
-    tweens.push({ obj, prop, start, diff, target, begin, dur: 900 });
+  function gsapTween(obj, prop, target, delay, opt) {
+    opt = opt || {};
+    tweens.push({
+      obj, prop, start: obj[prop], diff: target - obj[prop], target,
+      begin: performance.now() + delay, dur: opt.back ? 1250 : 950,
+      back: !!opt.back, mesh: opt.mesh || null, wig: opt.wig || 0
+    });
   }
 
-  /* 高亮某个部件：其余变暗，目标发光 */
+  /* 高亮某个部件：目标发光并微微放大，其余压暗，对比更清晰 */
   function highlight(idx, on) {
     if (!ready) return;
     parts.forEach((p, i) => {
@@ -988,11 +1085,14 @@ window.ExpGL = (function () {
       if (!m || m.emissive === undefined) return;
       const isTarget = on && i === idx;
       if (isTarget) {
-        m.emissive.set(0x402800);
-        m.emissiveIntensity = 1.6;
+        m.emissive.set(0x6b4200);
+        m.emissiveIntensity = 1.35;
+        p.mesh.scale.setScalar(1.05);
       } else {
         m.emissive.set(0x000000);
         m.emissiveIntensity = 0;
+        p.mesh.scale.setScalar(1);
+        if (m.userData.base) m.color.copy(on ? m.userData.base.clone().multiplyScalar(.38) : m.userData.base);
       }
     });
   }
@@ -1040,7 +1140,8 @@ window.ExpGL = (function () {
     } else {
       /* 点到空白：切换爆炸/贴合 */
       setExploded(!exploded, false);
-      badge.textContent = exploded ? "已爆炸 · 再点收拢" : "已收拢 · 点击建筑爆炸";
+      badge.textContent = exploded ? "已爆炸 · 单击空白收拢" : "拖拽旋转 · 单击建筑爆炸解构";
+      if (window.syncExpUI) syncExpUI();
     }
   });
 
@@ -1063,9 +1164,18 @@ window.ExpGL = (function () {
     for (let i = tweens.length - 1; i >= 0; i--) {
       const t = tweens[i];
       let k = (now - t.begin) / t.dur;
-      if (k >= 1) { t.obj[t.prop] = t.target; tweens.splice(i, 1); continue; }
-      k = 1 - Math.pow(1 - k, 3);
-      t.obj[t.prop] = t.start + t.diff * k;
+      if (k < 0) k = 0;
+      if (k >= 1) {
+        t.obj[t.prop] = t.target;
+        if (t.mesh) t.mesh.rotation.y = 0;
+        tweens.splice(i, 1);
+        continue;
+      }
+      const ke = t.back
+        ? 1 + 2.70158 * Math.pow(k - 1, 3) + 1.70158 * Math.pow(k - 1, 2)   /* backOut 回弹 */
+        : 1 - Math.pow(1 - k, 3);
+      t.obj[t.prop] = t.start + t.diff * ke;
+      if (t.mesh && t.wig) t.mesh.rotation.y = Math.sin(k * Math.PI) * t.wig;
     }
     controls.update();
     renderer.render(scene, cam);
@@ -1073,6 +1183,22 @@ window.ExpGL = (function () {
 
   return { highlight, pick, setExploded, get exploded() { return exploded; }, get ready() { return ready }, get partsDebug() { const v = new THREE.Vector3(); return parts.map(p => { p.mesh.getWorldPosition(v); return { n: p.mesh.name, z: +p.mesh.position.z.toFixed(3), w: [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)], rot: p.mesh.rotation.x ? "R" : "-" }; }); } };
 })();
+
+/* 展开/收拢按钮与徽标文案联动 */
+const expToggle = document.getElementById("expToggle");
+const expBadgeEl = document.getElementById("expBadge");
+window.syncExpUI = function () {
+  if (!expToggle) return;
+  const on = window.ExpGL && ExpGL.exploded;
+  expToggle.textContent = on ? "收 拢 归 位" : "展 开 九 层 结 构";
+  expBadgeEl.textContent = on ? "已爆炸 · 单击空白收拢" : "拖拽旋转 · 单击建筑爆炸解构";
+};
+if (expToggle) expToggle.addEventListener("click", e => {
+  e.stopPropagation();
+  if (!window.ExpGL || !ExpGL.ready) return;
+  ExpGL.setExploded(!ExpGL.exploded, false);
+  syncExpUI();
+});
 
 /* ================= 背景等高线 ================= */
 const bgcv = document.getElementById("bgcv");

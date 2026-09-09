@@ -308,6 +308,21 @@ svg.tagsvg circle{fill:var(--gold);}
   margin:8px 0 2px;font-weight:400;}
 #explode .info .en{font-size:9px;letter-spacing:.2em;color:var(--dim);}
 #explode .info p{margin-top:10px;font-size:11.5px;line-height:1.9;color:rgba(233,228,216,.82);letter-spacing:.05em;}
+/* 细节展示卡片（参考拆分图右侧细节区） */
+#explode .detail{padding:10px 12px;}
+#explode .detail h3{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;
+  font-family:var(--serif);font-size:13px;letter-spacing:.18em;color:var(--gold);font-weight:400;}
+#explode .detail h3 .en{font-size:8px;letter-spacing:.22em;color:var(--dim);font-family:var(--sans);}
+#explode .dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+#explode .dt{display:flex;flex-direction:column;gap:3px;padding:7px 8px;border-radius:3px;
+  border:1px solid rgba(232,201,138,.14);background:rgba(232,201,138,.03);cursor:pointer;transition:.25s;}
+#explode .dt:hover{border-color:rgba(232,201,138,.4);background:rgba(232,201,138,.07);}
+#explode .dt .ic{width:100%;aspect-ratio:1.4/1;border-radius:2px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(77,216,255,.08),rgba(232,201,138,.05));
+  border:1px solid rgba(232,201,138,.18);display:flex;align-items:center;justify-content:center;}
+#explode .dt .ic svg{width:72%;height:72%;stroke:rgba(232,201,138,.65);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+#explode .dt .nm{font-size:10.5px;letter-spacing:.12em;color:rgba(233,228,216,.88);}
+#explode .dt .ds{font-size:9px;line-height:1.5;color:rgba(233,228,216,.5);}
 #explode .layers{flex:1;overflow-y:auto;scrollbar-width:none;padding:6px;}
 #explode .layers::-webkit-scrollbar{display:none;}
 #explode .ly{display:flex;align-items:center;gap:10px;padding:7px 10px;cursor:pointer;border-radius:3px;
@@ -475,6 +490,10 @@ svg.tagsvg circle{fill:var(--gold);}
       <h4 id="iName" data-page-node-id="1jZfZkFkZ4GANtwUoLrddG">回澜阁 · 结构解构</h4>
       <div class="en" id="iEn" data-page-node-id="fp25nGvIq6UmQGIdJLuHID">EXPLODED VIEW</div>
       <p id="iDesc" data-page-node-id="f4jKrH9DOtYF9xRezv3QaV">单击建筑可展开九层结构爆炸；拖拽旋转查看，鼠标悬停各层高亮并显示构造说明。</p>
+    </div>
+    <div class="card detail" id="detailCard">
+      <h3>细节展示<span class="en">DETAILS</span></h3>
+      <div class="dt-grid" id="dtGrid"></div>
     </div>
     <div class="card layers" id="layerList" data-page-node-id="gA66fdQojGlEjYZDbRNYRd"></div>
   </aside>
@@ -824,6 +843,20 @@ const TwinGL = (function () {
   rim.position.set(-.8, .5, -.6);
   scene.add(rim);
 
+  /* 海面（参考航拍实景：建筑下方蓝色海面 + 微浪） */
+  const seaGeo = new THREE.PlaneGeometry(7, 7, 48, 48);
+  seaGeo.rotateX(-Math.PI / 2);
+  const seaMat = new THREE.MeshStandardMaterial({
+    color: 0x1a5a7a, roughness: .35, metalness: .1,
+    transparent: true, opacity: .62, side: THREE.DoubleSide
+  });
+  const sea = new THREE.Mesh(seaGeo, seaMat);
+  sea.position.y = -0.42;            /* 先给个默认值，模型加载后精修 */
+  scene.add(sea);
+  const seaPos = seaGeo.attributes.position;
+  const seaBase = [];
+  for (let i = 0; i < seaPos.count; i++) seaBase.push(seaPos.getY(i));
+
   const controls = new THREE.OrbitControls(cam, canvas);
   controls.target.set(0, .18, -.14);
   controls.enableDamping = true;
@@ -898,6 +931,8 @@ const TwinGL = (function () {
         ring.userData.spin = cfg[2];
         rings.push(ring); scene.add(ring);
       });
+      /* 海面贴合台基下方 */
+      sea.position.y = box.min.y - .04;
     },
     xhr => {
       const bar = twinLoad.querySelector(".bar i"), pct = twinLoad.querySelector(".pct2");
@@ -939,11 +974,22 @@ const TwinGL = (function () {
   let introMs = -1;
   function enterIntro() { introMs = 0; controls.enabled = false; controls.autoRotate = false; }
   const clock2 = new THREE.Clock();
+  let seaT = 0;
   (function loop() {
     requestAnimationFrame(loop);
     if (cur !== "twin") return;
     const dt2 = clock2.getDelta();
     rings.forEach(r => r.rotation.z += dt2 * r.userData.spin);
+    /* 海面微浪：多频正弦叠加 */
+    seaT += dt2;
+    for (let i = 0; i < seaPos.count; i++) {
+      const x = seaPos.getX(i), z = seaPos.getZ(i);
+      const w = Math.sin(x * 3.2 + seaT * 1.1) * .012
+              + Math.sin(z * 2.6 - seaT * .9) * .010
+              + Math.sin((x + z) * 1.8 + seaT * .7) * .006;
+      seaPos.setY(i, seaBase[i] + w);
+    }
+    seaPos.needsUpdate = true;
     if (introMs >= 0) {
       if (introMs === 0) introMs = performance.now();
       const k = (performance.now() - introMs) / 1600;
@@ -1012,6 +1058,30 @@ LAYERS.forEach(L => {
 const lyEls = [...layerList.querySelectorAll(".ly")];
 let pinned = -1;
 
+/* 细节展示（参考拆分图右侧：6 个构造细节，SVG 线描图标） */
+const DETAILS = [
+  { nm:"宝顶细节", ds:"铜质鎏金，造型庄重", svg:`<path d="M24 6 v6 M18 12 h12 v14 H18 z M16 26 h16 M20 30 h8"/>` },
+  { nm:"屋脊走兽", ds:"神兽列序，寓意吉祥", svg:`<path d="M6 28 L24 10 L42 28 M14 22 l4-2 M22 18 l4-2 M30 22 l4-2 M10 30 h32"/>` },
+  { nm:"斗拱结构", ds:"层出挑，承重装饰", svg:`<path d="M24 6 v8 M12 14 h24 M16 14 v6 M32 14 v6 M8 20 h32 M20 20 v6 M28 20 v6 M12 26 h24"/>` },
+  { nm:"窗棂细节", ds:"木质花格，雕刻精细", svg:`<rect x="8" y="8" width="32" height="32"/><path d="M8 24 h32 M24 8 v32 M12 12 l8 8 M36 12 l-8 8 M12 36 l8-8 M36 36 l-8-8"/>` },
+  { nm:"石柱础", ds:"花岗石质，稳固古朴", svg:`<path d="M10 30 h28 M12 30 v6 M36 30 v6 M14 24 h20 v6 H14 z M18 18 h12 v6 H18 z M22 10 h4 v8 h-4 z"/>` },
+  { nm:"栈桥灯柱", ds:"金白灯柱，临海而立", svg:`<path d="M24 8 v8 M18 16 h12 v4 H18 z M22 20 v14 M14 34 h20 M16 34 v6 M32 34 v6"/>` },
+];
+const dtGrid = document.getElementById("dtGrid");
+DETAILS.forEach(D => {
+  const el = document.createElement("div");
+  el.className = "dt";
+  el.innerHTML = `<div class="ic"><svg viewBox="0 0 48 40">${D.svg}</svg></div>
+    <span class="nm">${D.nm}</span><span class="ds">${D.ds}</span>`;
+  el.addEventListener("click", () => {
+    /* 点击细节项：若对应层存在则高亮该层 */
+    const map = { "宝顶细节":0, "屋脊走兽":1, "斗拱结构":6, "窗棂细节":7, "石柱础":8, "栈桥灯柱":8 };
+    const idx = map[D.nm];
+    if (idx !== undefined) { pinned = idx; setInfo(LAYERS[idx]); highlightPart(idx, true); }
+  });
+  dtGrid.appendChild(el);
+});
+
 function setInfo(L) {
   iNo.textContent = L.no; iName.textContent = L.name;
   iEn.textContent = L.en; iDesc.textContent = L.desc;
@@ -1063,8 +1133,8 @@ window.ExpGL = (function () {
   const cam = new THREE.PerspectiveCamera(40, 1, .01, 50);
   /* 参考图四取景：相机贴近、微仰角，收拢态模型占满视口主体 */
   const CAM_DIR = new THREE.Vector3(.55, .18, .82).normalize();
-  const CAM_DIST = { packed: 2.5, spread: 3.6 };   /* 收拢近 / 爆炸稍拉远 */
-  cam.position.set(CAM_DIR.x * CAM_DIST.packed, -0.93 + CAM_DIR.y * CAM_DIST.packed, CAM_DIR.z * CAM_DIST.packed);
+  const CAM_DIST = { packed: 1.8, spread: 2.8 };   /* 收拢近（图四贴满）/ 爆炸稍拉远 */
+  cam.position.set(CAM_DIR.x * CAM_DIST.packed, -0.85 + CAM_DIR.y * CAM_DIST.packed, CAM_DIR.z * CAM_DIST.packed);
 
   scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x161d29, .55));
   const key = new THREE.DirectionalLight(0xffd9a6, 1.7);
@@ -1081,11 +1151,11 @@ window.ExpGL = (function () {
   scene.add(grid);
 
   const controls = new THREE.OrbitControls(cam, canvas);
-  controls.target.set(0, -0.93, 0);
+  controls.target.set(0, -0.85, 0);
   controls.enableDamping = true;
   controls.dampingFactor = .08;
-  controls.minDistance = 1.25;
-  controls.maxDistance = 6.5;
+  controls.minDistance = 1.0;
+  controls.maxDistance = 5.0;
   controls.maxPolarAngle = Math.PI * .52;
   controls.enablePan = false;
 
@@ -1098,8 +1168,8 @@ window.ExpGL = (function () {
      按 LAYERS 顺序（顶→底）：6,0,8,5,4,7,3,1,2。各部件几何已平移至自身中心为原点，
      下面是贴合堆叠时的绝对 z（紧凑，层间略有搭接）。 */
   const packedZ = [0.37, 0.24, 0.36, 0.45, 0.69, 1.06, 1.33, 1.50, 1.62];
-  /* 爆炸态：参考拆分图的均匀适度空隙（原版散布过远，已压缩约 1/3） */
-  const spreadZ = [0.18, 0.34, 0.55, 0.78, 1.02, 1.30, 1.58, 1.84, 2.06];
+  /* 爆炸态：参考拆分图的均匀适度空隙（原版散布过远，再压缩约 30%） */
+  const spreadZ = [0.12, 0.24, 0.38, 0.52, 0.68, 0.86, 1.04, 1.22, 1.38];
 
   new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(
     "assets/9层.glb",
@@ -1154,7 +1224,7 @@ window.ExpGL = (function () {
 
   /* 设置爆炸/贴合：parts 数组按部件号排序，坐标数组按 LAYERS 列表顺序，
      必须经 partToIdx 把部件号转成列表序号再取目标 z；对焦高度与相机距离随状态联动 */
-  const FOCUS_Y = { packed: -0.93, spread: -1.12 };
+  const FOCUS_Y = { packed: -0.85, spread: -0.95 };
   function setExploded(on, instant) {
     exploded = on;
     const targetZ = on ? spreadZ : packedZ;

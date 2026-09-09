@@ -34,6 +34,31 @@ img{display:block;}
 #home .bg{position:absolute;inset:0;overflow:hidden;}
 #home .bg img{width:100%;height:100%;object-fit:cover;object-position:30% 26%;
   transform:scale(1.08);will-change:transform;}
+/* ---- 前奏层：3D 就绪前的水墨夜色开场（纯 CSS/SVG，秒开） ---- */
+#home .prelude{position:absolute;inset:0;z-index:0;pointer-events:none;transition:opacity 1.4s ease;}
+#home.ready .prelude{opacity:0;}
+.prelude .sky{position:absolute;inset:0;
+  background:radial-gradient(1100px 560px at 72% 26%,rgba(40,66,98,.50),transparent 62%),
+             radial-gradient(760px 420px at 16% 84%,rgba(14,32,46,.65),transparent 66%),
+             linear-gradient(180deg,#04070d 0%,#070d16 52%,#0a1420 100%);}
+.prelude .moon{position:absolute;right:15vw;top:15%;width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,rgba(242,232,206,.95),rgba(232,201,138,.45) 58%,rgba(232,201,138,.10) 74%,transparent 78%);
+  box-shadow:0 0 90px 34px rgba(232,201,138,.16);filter:blur(.5px);
+  animation:moonFloat 9s ease-in-out infinite;}
+@keyframes moonFloat{50%{transform:translateY(-9px);}}
+.prelude .art{position:absolute;right:5vw;top:50%;width:min(36vw,430px);opacity:.92;
+  transform:translateY(-50%);filter:drop-shadow(0 0 26px rgba(232,201,138,.22));
+  animation:artFloat 7s ease-in-out infinite;}
+@keyframes artFloat{50%{transform:translateY(calc(-50% - 11px));}}
+/* ---- 文字入场编排 ---- */
+@keyframes riseIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:none;}}
+#home nav{animation:riseIn .9s var(--ease) .15s both;}
+.hero .badge{animation:riseIn .9s var(--ease) .32s both;}
+.hero h1 .l1{animation:riseIn 1.05s var(--ease) .48s both;}
+.hero h1 .l2{animation:riseIn 1.05s var(--ease) .64s both;}
+.hero p{animation:riseIn 1.05s var(--ease) .84s both;}
+.hero .enter{animation:riseIn 1.05s var(--ease) 1s both;}
+#home .foot{animation:riseIn 1.05s var(--ease) 1.25s both;}
 #home .shade{position:absolute;inset:0;z-index:1;
   background:linear-gradient(90deg,rgba(4,7,10,.72) 0%,rgba(4,7,10,.25) 45%,rgba(4,7,10,0) 70%),
              linear-gradient(0deg,rgba(4,7,10,.75) 0%,transparent 30%);}
@@ -71,7 +96,7 @@ img{display:block;}
   text-shadow:0 1px 8px rgba(0,0,0,.8);}
 .foot .ln{width:44px;height:1px;background:rgba(232,201,138,.4);}
 /* 亭子热区 */
-#pavSpot{position:absolute;left:25%;top:14%;width:20%;height:30%;z-index:3;cursor:pointer;
+#pavSpot{position:absolute;left:52%;top:14%;width:30%;height:48%;z-index:3;cursor:pointer;
   border:none;background:transparent;}
 #pavSpot .ring{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;
   border-radius:50%;border:1px solid rgba(232,201,138,.85);animation:pulse 2.6s ease-out infinite;}
@@ -82,12 +107,13 @@ img{display:block;}
 @keyframes breathe{50%{opacity:.45;}}
 #heroGL{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.6s ease;}
 #heroGL.on{opacity:1;}
-#glLoad{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;
-  color:rgba(233,228,216,.78);font-size:12px;letter-spacing:.42em;display:flex;align-items:center;gap:14px;
+#glLoad{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);z-index:4;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  color:rgba(233,228,216,.78);font-size:12px;letter-spacing:.42em;
   transition:opacity .8s ease;}
 #glLoad.off{opacity:0;pointer-events:none;}
 #glLoad.warn{color:#e8b86a;font-size:13px;letter-spacing:.15em;}
-#glLoad .spin{width:20px;height:20px;border:1px solid rgba(233,228,216,.22);border-top-color:var(--gold);
+#glLoad .spin{width:24px;height:24px;border:1px solid rgba(232,201,138,.25);border-top-color:var(--gold);
   border-radius:50%;animation:sp 1s linear infinite;flex:none;}
 #glLoad .bar{width:220px;height:2px;background:rgba(233,228,216,.14);border-radius:2px;overflow:hidden;flex:none;}
 #glLoad .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#f5e3b0);
@@ -247,8 +273,36 @@ header>*{pointer-events:auto;}
 
 <!-- ================= ① 首页 ================= -->
 <div id="home" data-page-node-id="WMGsfZIwISkacAVZ1ObkMj">
-  <div class="bg" data-page-node-id="BN6FhzH24Q0zZ9NoNAB9vA"><canvas id="heroGL" data-page-node-id="baNJRh6VTZfM3MlNSBhlqm"></canvas></div>
-  <div id="glLoad" data-page-node-id="LrxQsgEFKlfq9y8LBMbnTc"><span class="spin" data-page-node-id="IlSnXpsDS6cDWUhE3fNia3"></span><span class="txt" data-page-node-id="wNQAHmSanZVyqhWOvBUA2r">正在构建数字孪生场景</span><span class="bar" data-page-node-id="e2RrCBhS9Ci5QuVUhiLLeE"><i data-page-node-id="qir2yEEsdC8SceAr1QaSbW"></i></span><span class="pct" data-page-node-id="qDDkqOudJKqSyupuAu86NX">0%</span></div>
+  <div class="bg" data-page-node-id="BN6FhzH24Q0zZ9NoNAB9vA">
+    <div class="prelude" aria-hidden="true">
+      <div class="sky"></div>
+      <div class="moon"></div>
+      <svg class="art" viewBox="0 0 240 250" fill="none">
+        <defs>
+          <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f2ddae" stop-opacity=".85"/>
+            <stop offset="1" stop-color="#e8c98a" stop-opacity=".2"/>
+          </linearGradient>
+        </defs>
+        <g stroke="url(#pg)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <circle cx="120" cy="24" r="5"/>
+          <path d="M120 29 v16"/>
+          <path d="M64 86 C92 80 108 64 120 45 C132 64 148 80 176 86 C156 90 138 88 120 88 C102 88 84 90 64 86 Z"/>
+          <path d="M88 88 h64 l-4 18 h-56 Z"/>
+          <path d="M40 150 C80 142 104 130 120 106 C136 130 160 142 200 150 C172 156 146 154 120 154 C94 154 68 156 40 150 Z"/>
+          <path d="M76 154 h88 l7 24 h-102 Z"/>
+          <path d="M58 178 h124"/>
+        </g>
+        <g stroke="rgba(232,201,138,.30)" stroke-width="1" stroke-linecap="round">
+          <path d="M66 202 h108"/>
+          <path d="M80 214 h80"/>
+          <path d="M92 226 h56"/>
+        </g>
+      </svg>
+    </div>
+    <canvas id="heroGL" data-page-node-id="baNJRh6VTZfM3MlNSBhlqm"></canvas>
+  </div>
+  <div id="glLoad" data-page-node-id="LrxQsgEFKlfq9y8LBMbnTc"><span class="spin" data-page-node-id="IlSnXpsDS6cDWUhE3fNia3"></span><span class="txt" data-page-node-id="wNQAHmSanZVyqhWOvBUA2r">墨色将启 · 正在唤醒百年楼阁</span><span class="bar" data-page-node-id="e2RrCBhS9Ci5QuVUhiLLeE"><i data-page-node-id="qir2yEEsdC8SceAr1QaSbW"></i></span><span class="pct" data-page-node-id="qDDkqOudJKqSyupuAu86NX">0%</span></div>
   <div class="shade" data-page-node-id="m5SHEiL7oa4OwqMDmTaWXe"></div>
   <nav data-page-node-id="CNXApK9iWqz75LlHHqJvwT">
     <a class="brand" href="#" onclick="return false" data-page-node-id="tUqslc0wENVMAbOBJQtrTp">回澜阁</a>
@@ -437,24 +491,27 @@ const HeroGL = (function () {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.24;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x060d18);
-  scene.fog = new THREE.FogExp2(0x0a1524, .38);
+  scene.fog = new THREE.FogExp2(0x0a1524, .21);
 
   const cam = new THREE.PerspectiveCamera(40, 1, .01, 60);
   /* 首页：建筑偏右（上移后），左/下留海面 */
-  const HOME_POS = new THREE.Vector3(.95, .46, 1.18);
-  const HOME_TGT = new THREE.Vector3(-.68, .34, -.20);
+  const HOME_POS = new THREE.Vector3(.78, .42, .98);
+  const HOME_TGT = new THREE.Vector3(-.42, .36, -.16);
   /* 点击后：拉近 + 换角度（绕到近斜侧，略仰视屋檐） */
   const PAVI_POS = new THREE.Vector3(.34, .42, .42);
   const PAVI_TGT = new THREE.Vector3(-.52, .44, -.26);
   cam.position.copy(HOME_POS);
+  /* 开场缓推起点（模型就绪后从远处电影式推近到 HOME_POS） */
+  const INTRO_FROM = new THREE.Vector3(HOME_POS.x * 1.55, HOME_POS.y + .34, HOME_POS.z * 1.55);
+  const _tp = new THREE.Vector3();
 
   /* 光照：黄昏暖主光 + 冷环境光 */
   scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x18202e, .55));
-  const sun = new THREE.DirectionalLight(0xffd9a6, 1.5);
+  const sun = new THREE.DirectionalLight(0xffd9a6, 1.8);
   sun.position.set(.8, 1.1, .5);
   scene.add(sun);
   const fill = new THREE.DirectionalLight(0x5f7fae, .5);
@@ -516,7 +573,7 @@ const HeroGL = (function () {
   glow.position.y = -0.299;
   scene.add(glow);
 
-  let ready = false, dollying = false, clock = new THREE.Clock(), gotBytes = false;
+  let ready = false, dollying = false, introT = 1, clock = new THREE.Clock(), gotBytes = false;
   /* 下载停滞看门狗：15 秒无字节则提示 */
   setTimeout(() => {
     if (!ready && !gotBytes) {
@@ -531,7 +588,9 @@ const HeroGL = (function () {
       m.traverse(o => { if (o.isMesh) { o.material.envMapIntensity = .6; } });
       scene.add(m);
       ready = true;
+      introT = 0;               /* 启动开场缓推 */
       canvas.classList.add("on");
+      home.classList.add("ready");
       loaderEl.classList.add("off");
     },
     xhr => {
@@ -543,7 +602,7 @@ const HeroGL = (function () {
       if (pct) pct.textContent = p + "%";
       if (xhr.loaded > 0) gotBytes = true;
       const txt = loaderEl.querySelector(".txt");
-      if (txt) txt.textContent = "正在加载鸟瞰模型";
+      if (txt) txt.textContent = "正在铺展鸟瞰长卷";
     },
     err => {
       loaderEl.innerHTML = "3D 场景加载失败 · 若直接双击打开请通过预览访问，或刷新重试";
@@ -569,11 +628,17 @@ const HeroGL = (function () {
       orbitA += dt * .022;
       cx += (mx - cx) * .04; cy += (my - cy) * .04;
       const r = .72, px = Math.sin(orbitA) * .10;
-      cam.position.set(
+      _tp.set(
         HOME_POS.x + px + cx * .10,
         HOME_POS.y - cy * .07 + Math.sin(t * .3) * .006,
         HOME_POS.z + Math.cos(orbitA) * .06
       );
+      if (introT < 1) {         /* 开场：由远及近电影式缓推 */
+        introT = Math.min(1, introT + dt / 2.8);
+        const ie = 1 - Math.pow(1 - introT, 3);
+        _tp.lerpVectors(INTRO_FROM, _tp, ie);
+      }
+      cam.position.copy(_tp);
       cam.lookAt(HOME_TGT);
     }
     renderer.render(scene, cam);

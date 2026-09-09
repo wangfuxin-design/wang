@@ -221,6 +221,31 @@ header>*{pointer-events:auto;}
   font-size:9.5px;letter-spacing:.25em;color:rgba(138,134,119,.8);border:1px dashed rgba(138,134,119,.4);
   padding:4px 12px;border-radius:2px;white-space:nowrap;}
 
+/* ---- 舞台四角括号 + 3D 标注标签（航拍大屏标注语言） ---- */
+#stage .cnr{position:absolute;width:26px;height:26px;z-index:4;pointer-events:none;
+  border:1px solid rgba(232,201,138,.7);}
+#stage .cnr.tl{left:6px;top:6px;border-right:none;border-bottom:none;}
+#stage .cnr.tr{right:6px;top:6px;border-left:none;border-bottom:none;}
+#stage .cnr.bl{left:6px;bottom:6px;border-right:none;border-top:none;}
+#stage .cnr.br{right:6px;bottom:6px;border-left:none;border-top:none;}
+#twinTags,#expTags{position:absolute;inset:0;z-index:7;pointer-events:none;transition:opacity .5s;}
+#twinTags.off,#expTags.off{opacity:0;pointer-events:none;}
+svg.tagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;transition:opacity .5s;}
+svg.tagsvg.off{opacity:0;}
+svg.tagsvg line{stroke:rgba(232,201,138,.5);stroke-width:1;}
+svg.tagsvg circle{fill:var(--gold);}
+.gtag{position:absolute;pointer-events:auto;white-space:nowrap;border-radius:2px;
+  background:rgba(8,12,18,.78);border:1px solid rgba(232,201,138,.42);
+  padding:5px 11px;font-size:10.5px;letter-spacing:.16em;color:#efe9da;backdrop-filter:blur(6px);}
+.gtag .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);
+  margin-right:7px;vertical-align:1px;animation:tagPulse 2.2s ease-out infinite;}
+.gtag small{display:block;font-size:8px;letter-spacing:.24em;color:var(--dim);margin-top:2px;}
+.gtag .no2{color:var(--gold);margin-right:8px;font-variant-numeric:tabular-nums;}
+.gtag.tag-ly{cursor:pointer;}
+.gtag.tag-ly:hover{background:rgba(232,201,138,.16);border-color:var(--gold);}
+@keyframes tagPulse{0%{box-shadow:0 0 0 0 rgba(232,201,138,.5);}70%{box-shadow:0 0 0 8px rgba(232,201,138,0);}100%{box-shadow:0 0 0 0 rgba(232,201,138,0);}}
+@media(max-width:1100px){#twinTags,#twinTagSvg{display:none;}}
+
 /* 底部 HUD */
 #hud{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;
   display:flex;align-items:center;gap:14px;padding:9px 18px;
@@ -407,6 +432,9 @@ header>*{pointer-events:auto;}
   </aside>
 
   <div id="stage" title="" data-page-node-id="pEP1lW25rrgAFgb6TG8V33">
+    <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+    <svg class="tagsvg" id="twinTagSvg"></svg>
+    <div id="twinTags"></div>
     <div class="holo" id="holo" data-page-node-id="3r7ZNmXHmuJEHKqY1b9sNZ">
       <div class="modelbox is-on" data-page-node-id="uwhauDqHh1lcF1K8HVt8nW"><canvas id="twinGL" data-page-node-id="fScGCJ0RstDFHH8zGuWwJy"></canvas></div>
       <div class="m-badge" id="mBadge" data-page-node-id="f6x12Is9zNN6AveMoZ3LY0">拖拽旋转 · 滚轮缩放 · 单击建筑展开解构</div>
@@ -430,6 +458,9 @@ header>*{pointer-events:auto;}
   <div class="sheet-wrap" data-page-node-id="PGjBH9BXcFObvFekkrgDxH">
     <div class="sheet3d" id="sheet3d" data-page-node-id="vBcFrgzcjWOtlYcWll4UiC">
       <canvas id="expGL" data-page-node-id="XwFUFUSmWz8ekFsasqyRDU"></canvas>
+      <svg class="tagsvg" id="expTagSvg"></svg>
+      <div id="expTags" class="off"></div>
+      <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
       <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
       <div class="floor-glow"></div>
       <div class="exp-badge" id="expBadge">拖拽旋转 · 单击建筑爆炸解构</div>
@@ -760,6 +791,16 @@ document.addEventListener("keydown", e => {
   else if (cur === "twin") goHome();
 });
 
+/* 世界坐标 → 画布像素（供两页 3D 标注引线用） */
+const _pv = new THREE.Vector3();
+function toScreen(v3, cam, ox, oy, w, h, out) {
+  _pv.copy(v3).project(cam);
+  if (_pv.z > 1) return false;              /* 在相机背后 */
+  out.x = ox + (_pv.x * .5 + .5) * w;
+  out.y = oy + (-_pv.y * .5 + .5) * h;
+  return true;
+}
+
 /* ================= 孪生场景 · Three.js ================= */
 const TwinGL = (function () {
   const canvas = document.getElementById("twinGL");
@@ -797,6 +838,40 @@ const TwinGL = (function () {
   let buildingMeshes = [], twinReady = false;
   const mBadge = document.getElementById("mBadge");
   const twinLoad = document.getElementById("twinLoad");
+  /* 3D 标注 + 底部雷达光环（参考航拍大屏的标注语言） */
+  let tagEls = [], rings = [];
+  const stageEl = document.getElementById("stage");
+  function buildTwinTags(anchors) {
+    const wrap = document.getElementById("twinTags");
+    const svg = document.getElementById("twinTagSvg");
+    anchors.forEach(a => {
+      const el = document.createElement("div");
+      el.className = "gtag";
+      el.innerHTML = `<span class="dot"></span>${a.name}<small>${a.en}</small>`;
+      wrap.appendChild(el);
+      const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("r", "2.4");
+      svg.appendChild(ln); svg.appendChild(dot);
+      tagEls.push({ el, ln, dot, a });
+    });
+  }
+  function updateTags() {
+    if (!tagEls.length) return;
+    const sr = stageEl.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+    const ox = cr.left - sr.left, oy = cr.top - sr.top;
+    const pt = { x: 0, y: 0 };
+    tagEls.forEach(t => {
+      const ok = toScreen(t.a.p, cam, ox, oy, cr.width, cr.height, pt);
+      t.el.style.display = t.ln.style.display = t.dot.style.display = ok ? "" : "none";
+      if (!ok) return;
+      const tx = pt.x + t.a.off[0], ty = pt.y + t.a.off[1];
+      t.el.style.left = tx + "px"; t.el.style.top = ty + "px";
+      t.ln.setAttribute("x1", pt.x); t.ln.setAttribute("y1", pt.y);
+      t.ln.setAttribute("x2", tx);  t.ln.setAttribute("y2", ty + t.el.offsetHeight / 2);
+      t.dot.setAttribute("cx", pt.x); t.dot.setAttribute("cy", pt.y);
+    });
+  }
   new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(MODEL_SRC,
     g => {
       g.scene.traverse(o => { if (o.isMesh) buildingMeshes.push(o); });
@@ -804,6 +879,25 @@ const TwinGL = (function () {
       twinReady = true;
       twinLoad.classList.add("off");
       mBadge.textContent = "拖拽旋转 · 滚轮缩放 · 单击建筑展开解构";
+      /* 标注锚点：宝顶 / 檐下匾额 / 台基 */
+      const box = new THREE.Box3().setFromObject(g.scene);
+      const bc = box.getCenter(new THREE.Vector3()), bs = box.getSize(new THREE.Vector3());
+      buildTwinTags([
+        { name: "鎏金宝顶", en: "GILT FINIAL",  p: new THREE.Vector3(bc.x, box.max.y + .01, bc.z), off: [48, -66] },
+        { name: "重檐匾额", en: "PLAQUE",       p: new THREE.Vector3(bc.x, box.min.y + bs.y * .62, box.max.z + bs.z * .12), off: [66, -16] },
+        { name: "八角石台基", en: "OCTAGON BASE", p: new THREE.Vector3(bc.x, box.min.y + bs.y * .04, bc.z), off: [58, 42] },
+      ]);
+      /* 底部双弧雷达光环：金/青对转 */
+      const rBase = Math.max(bs.x, bs.z) * .72;
+      [["#e8c98a", 1, .16, Math.PI * 1.5], ["#4dd8ff", .72, -.22, Math.PI * 1.1]].forEach(cfg => {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(rBase * cfg[1] * .92, rBase * cfg[1], 72, 1, 0, cfg[3]),
+          new THREE.MeshBasicMaterial({ color: cfg[0], transparent: true, opacity: .38, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = box.min.y - .012;
+        ring.userData.spin = cfg[2];
+        rings.push(ring); scene.add(ring);
+      });
     },
     xhr => {
       const bar = twinLoad.querySelector(".bar i"), pct = twinLoad.querySelector(".pct2");
@@ -848,6 +942,8 @@ const TwinGL = (function () {
   (function loop() {
     requestAnimationFrame(loop);
     if (cur !== "twin") return;
+    const dt2 = clock2.getDelta();
+    rings.forEach(r => r.rotation.z += dt2 * r.userData.spin);
     if (introMs >= 0) {
       if (introMs === 0) introMs = performance.now();
       const k = (performance.now() - introMs) / 1600;
@@ -858,13 +954,13 @@ const TwinGL = (function () {
         cam.position.lerpVectors(TWIN_FROM, TWIN_HOME, e);
         cam.lookAt(controls.target);
         renderer.render(scene, cam);
-        clock2.getDelta();
+        updateTags();
         return;
       }
     }
     controls.update();
     renderer.render(scene, cam);
-    clock2.getDelta();
+    updateTags();
   })();
 
   return { pick, enterIntro };
@@ -965,7 +1061,10 @@ window.ExpGL = (function () {
   expRoot.rotation.x = Math.PI / 2;
   scene.add(expRoot);
   const cam = new THREE.PerspectiveCamera(40, 1, .01, 50);
-  cam.position.set(1.45, -0.75, 3.7);
+  /* 参考图四取景：相机贴近、微仰角，收拢态模型占满视口主体 */
+  const CAM_DIR = new THREE.Vector3(.55, .18, .82).normalize();
+  const CAM_DIST = { packed: 2.5, spread: 3.6 };   /* 收拢近 / 爆炸稍拉远 */
+  cam.position.set(CAM_DIR.x * CAM_DIST.packed, -0.93 + CAM_DIR.y * CAM_DIST.packed, CAM_DIR.z * CAM_DIST.packed);
 
   scene.add(new THREE.HemisphereLight(0x8fb2d8, 0x161d29, .55));
   const key = new THREE.DirectionalLight(0xffd9a6, 1.7);
@@ -975,26 +1074,32 @@ window.ExpGL = (function () {
   rim.position.set(-.8, .5, -.6);
   scene.add(rim);
 
+  /* 地面参考网格（图四视口语言）：模型下方淡淡的坐标网 */
+  const grid = new THREE.GridHelper(5.4, 26, 0x223145, 0x121b29);
+  grid.position.y = -2.24;
+  grid.material.transparent = true; grid.material.opacity = .5;
+  scene.add(grid);
+
   const controls = new THREE.OrbitControls(cam, canvas);
-  controls.target.set(0, -0.85, 0);
+  controls.target.set(0, -0.93, 0);
   controls.enableDamping = true;
   controls.dampingFactor = .08;
-  controls.minDistance = 1.0;
-  controls.maxDistance = 9.0;
+  controls.minDistance = 1.25;
+  controls.maxDistance = 6.5;
   controls.maxPolarAngle = Math.PI * .52;
   controls.enablePan = false;
 
   let parts = [];          // { mesh, mat, baseZ, origCenter, exploded }
   let exploded = false;
   let ready = false;
+  const expTagEls = [];    // 左侧引线标注
 
   /* 贴合态：模型自带"上下"是 Z 轴。9层.glb 共 9 个部件 part_0~8，
      按 LAYERS 顺序（顶→底）：6,0,8,5,4,7,3,1,2。各部件几何已平移至自身中心为原点，
      下面是贴合堆叠时的绝对 z（紧凑，层间略有搭接）。 */
   const packedZ = [0.37, 0.24, 0.36, 0.45, 0.69, 1.06, 1.33, 1.50, 1.62];
-  /* 爆炸态：层间均匀拉开，宝顶上抬；爆炸时用回弹缓动 + 层次微旋，观感更有张力。
-     宝顶(part_6)因杂面导致几何中心偏移 +0.29，z 值已补偿 */
-  const spreadZ = [0.05, 0.12, 0.40, 0.68, 1.00, 1.38, 1.72, 2.06, 2.38];
+  /* 爆炸态：参考拆分图的均匀适度空隙（原版散布过远，已压缩约 1/3） */
+  const spreadZ = [0.18, 0.34, 0.55, 0.78, 1.02, 1.30, 1.58, 1.84, 2.06];
 
   new THREE.GLTFLoader().setDRACOLoader(dracoLoader).load(
     "assets/9层.glb",
@@ -1031,6 +1136,7 @@ window.ExpGL = (function () {
       ready = true;
       loaderEl.classList.add("off");
       badge.textContent = "拖拽旋转 · 单击建筑爆炸解构";
+      buildExpTags();
     },
     xhr => {
       const bar = loaderEl.querySelector(".bar i"), pct = loaderEl.querySelector(".pct");
@@ -1047,14 +1153,27 @@ window.ExpGL = (function () {
   );
 
   /* 设置爆炸/贴合：parts 数组按部件号排序，坐标数组按 LAYERS 列表顺序，
-     必须经 partToIdx 把部件号转成列表序号再取目标 z；对焦高度随状态联动 */
-  const FOCUS_Y = { packed: -0.85, spread: -1.16 };
+     必须经 partToIdx 把部件号转成列表序号再取目标 z；对焦高度与相机距离随状态联动 */
+  const FOCUS_Y = { packed: -0.93, spread: -1.12 };
   function setExploded(on, instant) {
     exploded = on;
     const targetZ = on ? spreadZ : packedZ;
     const ty = on ? FOCUS_Y.spread : FOCUS_Y.packed;
-    if (instant) { controls.target.y = ty; }
-    else { gsapTween(controls.target, "y", ty, 0); }
+    const dist = on ? CAM_DIST.spread : CAM_DIST.packed;
+    if (instant) {
+      controls.target.y = ty;
+      cam.position.set(CAM_DIR.x * dist, ty + CAM_DIR.y * dist, CAM_DIR.z * dist);
+    } else {
+      gsapTween(controls.target, "y", ty, 0);
+      gsapTween(cam.position, "x", CAM_DIR.x * dist, 0);
+      gsapTween(cam.position, "y", ty + CAM_DIR.y * dist, 0);
+      gsapTween(cam.position, "z", CAM_DIR.z * dist, 0);
+    }
+    /* 引线标注只在爆炸态出现 */
+    ["expTags", "expTagSvg"].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.toggle("off", !on);
+    });
     parts.forEach((p, i) => {
       const li = partToIdx[i];
       const tz = (li !== undefined && targetZ[li] !== undefined) ? targetZ[li] : 0;
@@ -1074,6 +1193,48 @@ window.ExpGL = (function () {
       obj, prop, start: obj[prop], diff: target - obj[prop], target,
       begin: performance.now() + delay, dur: opt.back ? 1250 : 950,
       back: !!opt.back, mesh: opt.mesh || null, wig: opt.wig || 0
+    });
+  }
+
+  /* 左侧引线标注（参考拆分图的信息图语言）：仅爆炸态显示，悬停联动右侧信息 */
+  function buildExpTags() {
+    const wrap = document.getElementById("expTags");
+    const svg = document.getElementById("expTagSvg");
+    LAYERS.forEach((L, i) => {
+      const el = document.createElement("div");
+      el.className = "gtag tag-ly";
+      el.innerHTML = `<span class="no2">${L.no}</span>${L.name}`;
+      wrap.appendChild(el);
+      const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("r", "2.2");
+      svg.appendChild(ln); svg.appendChild(dot);
+      expTagEls.push({ el, ln, dot, pi: L.part });
+      el.addEventListener("mouseenter", () => { setInfo(L); highlightPart(i, true); });
+      el.addEventListener("mouseleave", () => { if (pinned !== i) { highlightPart(i, false); resetInfo(); } });
+      el.addEventListener("click", e => {
+        e.stopPropagation();
+        if (pinned === i) unpin();
+        else { pinned = i; setInfo(L); highlightPart(i, true); }
+      });
+    });
+  }
+  function updateExpTags() {
+    if (!expTagEls.length || !exploded) return;
+    const cr = canvas.getBoundingClientRect();
+    const pt = { x: 0, y: 0 }, v = new THREE.Vector3();
+    expTagEls.forEach(t => {
+      const part = parts[t.pi];
+      if (!part) return;
+      part.mesh.getWorldPosition(v);
+      const ok = toScreen(v, cam, 0, 0, cr.width, cr.height, pt);
+      t.el.style.display = t.ln.style.display = t.dot.style.display = ok ? "" : "none";
+      if (!ok) return;
+      const ty = Math.max(14, Math.min(cr.height - 30, pt.y - 11));
+      t.el.style.left = "10px"; t.el.style.top = ty + "px";
+      t.ln.setAttribute("x1", 10 + t.el.offsetWidth); t.ln.setAttribute("y1", ty + t.el.offsetHeight / 2);
+      t.ln.setAttribute("x2", pt.x); t.ln.setAttribute("y2", pt.y);
+      t.dot.setAttribute("cx", pt.x); t.dot.setAttribute("cy", pt.y);
     });
   }
 
@@ -1179,6 +1340,7 @@ window.ExpGL = (function () {
     }
     controls.update();
     renderer.render(scene, cam);
+    updateExpTags();
   })();
 
   return { highlight, pick, setExploded, get exploded() { return exploded; }, get ready() { return ready }, get partsDebug() { const v = new THREE.Vector3(); return parts.map(p => { p.mesh.getWorldPosition(v); return { n: p.mesh.name, z: +p.mesh.position.z.toFixed(3), w: [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)], rot: p.mesh.rotation.x ? "R" : "-" }; }); } };
